@@ -1,20 +1,33 @@
 import '@/global.css';
 
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
+import { DarkTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useColorScheme } from 'react-native';
+import { useEffect } from 'react';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+import { supabase } from '@/lib/supabase';
 
 SplashScreen.preventAutoHideAsync();
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+export default function RootLayout() {
+  useEffect(() => {
+    supabase.from('exercises').select('nom').limit(3)
+      .then(({ data, error }) => {
+        if (error) console.error('Erreur Supabase:', error);
+        else console.log('Connexion OK:', data);
+      });
+  }, []);
+
+  // Dark-only : pas de useColorScheme, le CLAUDE.md exclut le light mode.
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={DarkTheme}>
       <AnimatedSplashOverlay />
-      <AppTabs />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="workout/[id]" />
+        <Stack.Screen name="(onboarding)/reveal" />
+        <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
+      </Stack>
     </ThemeProvider>
   );
 }
