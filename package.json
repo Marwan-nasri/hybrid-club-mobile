@@ -46,7 +46,8 @@
     "lint": "expo lint",
     "test:generator": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-program-generator.ts",
     "build:catalogue": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/build-exercise-bundle.ts",
-    "audit:substitutions": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/audit-substitutions.ts"
+    "audit:substitutions": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/audit-substitutions.ts",
+    "test:insertion": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-insertion-programme.ts"
   },
   "private": true
 }

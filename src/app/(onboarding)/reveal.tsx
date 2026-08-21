@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { useEffect } from 'react';
 
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,6 +9,7 @@ import { Card } from '@/components/ui/Card';
 import { StatBlock } from '@/components/ui/StatBlock';
 import { NOM_EXERCICE } from '@/lib/catalogue';
 import { genererProgramme } from '@/lib/programme';
+import { majProfil } from '@/lib/profilOnboarding';
 
 import type { BodyZone, GeneratedSession, GeneratorProfile } from '@/lib/programGenerator';
 
@@ -98,6 +100,13 @@ function description(profile: GeneratorProfile): string {
 
 export default function RevealScreen() {
   const programme = genererProgramme(PROFIL_DEMO);
+
+  // Le quiz écrira le profil réponse par réponse ; en attendant, le reveal pose
+  // PROFIL_DEMO pour que l'insertion post-authentification ait de quoi
+  // régénérer. À retirer quand les 10 écrans du quiz existeront.
+  useEffect(() => {
+    majProfil(PROFIL_DEMO);
+  }, []);
 
   if (__DEV__ && programme.warnings.length > 0) {
     console.warn(

@@ -122,6 +122,8 @@ La substitution pour blessures (`limitations[]` → `substituts[]`) est un diff�
 
 Le catalogue d'exercices est **embarqué dans l'app**, pas lu en base : le reveal (A6) et le paywall (A7) sont pré-authentification, et la RLS de `exercises` exige un utilisateur connecté. Un aller-retour réseau à cet endroit serait un point de friction au pire moment du funnel.
 
+**Le moteur doit rester strictement déterministe : `programme = f(profil)`.** C'est ce qui permet de ne transporter que le profil d'onboarding (persisté dans AsyncStorage, `src/lib/profilOnboarding.ts`) à travers le tunnel quiz → reveal → paywall → création de compte, et de régénérer après authentification pour insérer. Si le moteur gagne un jour de la variété (pool d'exercices tournants, aléatoire), le programme affiché en A6 et celui inséré après l'auth divergeraient : il faudra alors transporter le programme lui-même, pas le profil.
+
 **Si tu modifies le seed `exercises` ou `exercise_substitutions` dans `supabase/migrations/`, relance `npm run build:catalogue`.** Le script régénère `src/lib/exercises.generated.json` depuis les migrations — sans ça, l'app continue de tourner sur l'ancien catalogue. Ne jamais éditer ce JSON à la main.
 
 ## Conventions de code
@@ -148,8 +150,11 @@ Le catalogue d'exercices est **embarqué dans l'app**, pas lu en base : le revea
   leg-press). À traiter comme un chantier dédié.
 - Migration 002 : la ligne seated-calf-raise → plank est mal pensée 
   (substitution qui change la nature du mouvement). À corriger.
-- Insertion Supabase du programme généré : pas encore branchée, le moteur 
-  ne calcule qu'en mémoire.
+- Insertion Supabase : `creer_programme` (migration 006, RPC atomique) et
+  `enregistrerProgrammeEnAttente()` existent, mais aucun écran ne les appelle —
+  l'écran post-création de compte n'existe pas encore. Vérifiée de bout en bout
+  le 2026-08-22 sur le projet de dev (60 séances / 276 blocs). Test manuel :
+  `npm run test:insertion` (voir en-tête du script pour les variables).
 - PROFIL_DEMO codé en dur dans reveal.tsx, à remplacer par l'état du quiz.
 
 ## État d'avancement
@@ -161,6 +166,7 @@ Le catalogue d'exercices est **embarqué dans l'app**, pas lu en base : le revea
 - [ ] Schéma Supabase + RLS
 - [ ] Les 6 composants de base
 - [x] Moteur de génération de programme
+- [x] Persistance Supabase du programme (RPC 006, non branchée)
 - [ ] Écran de séance live
 - [ ] Onboarding + paywall
 - [ ] RevenueCat
