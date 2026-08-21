@@ -1,0 +1,125 @@
+{
+  "template_id": "niveau-avance",
+  "niveau": "avance",
+
+  "note_architecture": "Même logique que l'intermédiaire (pool + priorité par objectif). Différences : intensités plus proches du 1RM réel, repos cardio plus courts (densité plus haute), et un jour de spécialisation remplace le renfort généraliste — un avancé sait déjà cibler son point faible plutôt que de tout travailler également.",
+
+  "selection_rule": "jours_dispo = N → prendre les N premiers ids de la liste 'ordre' correspondant à l'objectif déclaré dans objectif_modifiers.",
+
+  "pool_jours": [
+    {
+      "id": "force_bas",
+      "nom": "Force — Bas du corps",
+      "type": "muscu",
+      "duree_estimee_min": 65,
+      "note": "Squat et deadlift lourds. Densité plus haute qu'en intermédiaire — l'avancé maîtrise déjà la technique sous charge.",
+      "blocs_semaine_1": [
+        { "exercise_slug": "back-squat", "ordre": 1, "series": 5, "reps_cible": "4", "pct_1rm": 68, "rpe": 6, "repos_sec": 180 },
+        { "exercise_slug": "deadlift", "ordre": 2, "series": 3, "reps_cible": "5", "pct_1rm": 68, "rpe": 7, "repos_sec": 180 },
+        { "exercise_slug": "bulgarian-split-squat", "ordre": 3, "series": 3, "reps_cible": "10 par jambe", "rpe": 7, "repos_sec": 90 },
+        { "exercise_slug": "hip-thrust", "ordre": 4, "series": 3, "reps_cible": "10", "rpe": 7, "repos_sec": 90 },
+        { "exercise_slug": "hanging-leg-raise", "ordre": 5, "series": 3, "reps_cible": "12", "rpe": 7, "repos_sec": 60 }
+      ]
+    },
+    {
+      "id": "force_haut",
+      "nom": "Force — Haut du corps",
+      "type": "muscu",
+      "duree_estimee_min": 65,
+      "note": "Compléments lourds sur les compounds. Le pull-up peut être lesté si le poids du corps est maîtrisé au-delà de 8 reps propres.",
+      "blocs_semaine_1": [
+        { "exercise_slug": "bench-press", "ordre": 1, "series": 5, "reps_cible": "4", "pct_1rm": 68, "rpe": 6, "repos_sec": 180 },
+        { "exercise_slug": "pull-up", "ordre": 2, "series": 4, "reps_cible": "8", "rpe": 7, "notes": "Ajoute du lest si tu dépasses 8 reps propres au poids du corps", "repos_sec": 120 },
+        { "exercise_slug": "barbell-row", "ordre": 3, "series": 4, "reps_cible": "6", "rpe": 7, "repos_sec": 120 },
+        { "exercise_slug": "overhead-press", "ordre": 4, "series": 3, "reps_cible": "6", "pct_1rm": 65, "rpe": 7, "repos_sec": 100 },
+        { "exercise_slug": "close-grip-bench", "ordre": 5, "series": 3, "reps_cible": "8", "rpe": 7, "repos_sec": 90 },
+        { "exercise_slug": "dips", "ordre": 6, "series": 3, "reps_cible": "10", "rpe": 7, "notes": "Ajoute du lest si nécessaire", "repos_sec": 90 }
+      ]
+    },
+    {
+      "id": "cardio_engine",
+      "nom": "Cardio — Engine",
+      "type": "cardio",
+      "duree_estimee_min": 45,
+      "note": "Densité plus haute qu'en intermédiaire — repos plus courts entre les intervalles.",
+      "blocs_semaine_1": [
+        { "ordre": 1, "cardio_type": "course", "intervalles": { "effort_sec": 45, "recup_sec": 60, "repetitions": 12 }, "notes": "Zone 4-5, récupération incomplète" },
+        { "exercise_slug": "kettlebell-swing", "ordre": 2, "series": 5, "reps_cible": "15", "rpe": 8, "repos_sec": 45 },
+        { "exercise_slug": "wall-ball", "ordre": 3, "series": 5, "reps_cible": "15", "rpe": 8, "repos_sec": 45 }
+      ]
+    },
+    {
+      "id": "fonctionnel",
+      "nom": "Fonctionnel — Force & portage",
+      "type": "hybride",
+      "duree_estimee_min": 55,
+      "note": "Charges et volumes supérieurs à l'intermédiaire.",
+      "blocs_semaine_1": [
+        { "exercise_slug": "sled-push", "ordre": 1, "series": 5, "reps_cible": "25m", "rpe": 8, "repos_sec": 75 },
+        { "exercise_slug": "farmers-carry", "ordre": 2, "series": 5, "reps_cible": "50m", "rpe": 8, "repos_sec": 75 },
+        { "exercise_slug": "sandbag-lunge", "ordre": 3, "series": 4, "reps_cible": "12 par jambe", "rpe": 8, "repos_sec": 75 },
+        { "exercise_slug": "burpee-broad-jump", "ordre": 4, "series": 4, "reps_cible": "12", "rpe": 8, "repos_sec": 75 },
+        { "exercise_slug": "sled-pull", "ordre": 5, "series": 4, "reps_cible": "25m", "rpe": 8, "repos_sec": 75 }
+      ]
+    },
+    {
+      "id": "endurance_longue",
+      "nom": "Endurance longue",
+      "type": "hybride",
+      "duree_estimee_min": 60,
+      "note": "Durée supérieure à l'intermédiaire, avec un segment optionnel proche de l'allure de course cible.",
+      "blocs_semaine_1": [
+        { "ordre": 1, "cardio_type": "course", "duree_sec": 3000, "notes": "50 min, zone 2, avec 10 min finales à allure cible si tu prépares une course" },
+        { "exercise_slug": "romanian-deadlift", "ordre": 2, "series": 3, "reps_cible": "10", "rpe": 6, "repos_sec": 90 },
+        { "exercise_slug": "ab-wheel", "ordre": 3, "series": 3, "reps_cible": "12", "rpe": 7, "repos_sec": 60 },
+        { "exercise_slug": "hanging-leg-raise", "ordre": 4, "series": 3, "reps_cible": "15", "rpe": 7, "repos_sec": 60 }
+      ]
+    },
+    {
+      "id": "force_specialisation",
+      "nom": "Force — Spécialisation",
+      "type": "muscu",
+      "duree_estimee_min": 50,
+      "note": "Jour de point faible. Variante de squat, poussée verticale lourde, accessoires ciblés — l'avancé sait où il doit progresser.",
+      "blocs_semaine_1": [
+        { "exercise_slug": "front-squat", "ordre": 1, "series": 4, "reps_cible": "5", "pct_1rm": 68, "rpe": 7, "repos_sec": 150 },
+        { "exercise_slug": "close-grip-bench", "ordre": 2, "series": 4, "reps_cible": "6", "rpe": 8, "repos_sec": 120 },
+        { "exercise_slug": "dips", "ordre": 3, "series": 4, "reps_cible": "10", "rpe": 8, "notes": "Ajoute du lest si nécessaire", "repos_sec": 90 },
+        { "exercise_slug": "lateral-raise", "ordre": 4, "series": 3, "reps_cible": "15", "rpe": 7, "repos_sec": 60 },
+        { "exercise_slug": "ab-wheel", "ordre": 5, "series": 3, "reps_cible": "12", "rpe": 7, "repos_sec": 60 }
+      ]
+    }
+  ],
+
+  "objectif_modifiers": {
+    "hyrox": {
+      "ordre": ["force_bas", "force_haut", "cardio_engine", "fonctionnel", "endurance_longue", "force_specialisation"],
+      "ratio_muscu_cardio": 55,
+      "note_coaching": "À ce niveau, l'engine fait souvent la différence sur le classement plus que la force brute."
+    },
+    "recomposition": {
+      "ordre": ["force_bas", "force_haut", "force_specialisation", "cardio_engine", "fonctionnel", "endurance_longue"],
+      "ratio_muscu_cardio": 75,
+      "note_coaching": "Volume de musculation prioritaire, spécialisation sur le point faible identifié."
+    },
+    "performance": {
+      "ordre": ["force_bas", "force_haut", "force_specialisation", "endurance_longue", "cardio_engine", "fonctionnel"],
+      "ratio_muscu_cardio": 80,
+      "note_coaching": "Priorité totale à la force — le cardio reste présent en entretien minimal."
+    },
+    "marathon_muscu": {
+      "ordre": ["endurance_longue", "cardio_engine", "force_bas", "force_haut", "fonctionnel", "force_specialisation"],
+      "ratio_muscu_cardio": 30,
+      "note_coaching": "La musculation reste un support, jamais au détriment de la fraîcheur pour les séances clés de course."
+    }
+  },
+
+  "progression": {
+    "phase_1_accumulation": { "semaines": [1, 2, 3], "pct_1rm": [68, 72, 75], "rpe": [6, 7, 7], "volume_modifier": 1.0 },
+    "deload_1": { "semaines": [4], "pct_1rm": [60], "rpe": [5], "volume_modifier": 0.55 },
+    "phase_2_intensification": { "semaines": [5, 6, 7], "pct_1rm": [78, 82, 85], "rpe": [7, 8, 8], "volume_modifier": 0.85 },
+    "deload_2": { "semaines": [8], "pct_1rm": [68], "rpe": [5], "volume_modifier": 0.55 },
+    "phase_3_peak": { "semaines": [9, 10, 11], "pct_1rm": [86, 90, 93], "rpe": [8, 9, 9], "volume_modifier": 0.7 },
+    "taper": { "semaines": [12], "pct_1rm": [72], "rpe": [6], "volume_modifier": 0.45 }
+  }
+}

@@ -6,124 +6,114 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { StatBlock } from '@/components/ui/StatBlock';
+import { NOM_EXERCICE } from '@/lib/catalogue';
+import { genererProgramme } from '@/lib/programme';
 
-// Structure calquée sur le schéma Supabase (programs / sessions / session_blocks)
-// pour que le branchement du moteur de génération ne demande pas de réécriture.
-type SessionBlock = { exercice: string; prescription: string };
+import type { BodyZone, GeneratedSession, GeneratorProfile } from '@/lib/programGenerator';
 
-type Session = {
-  jour: string;
-  nom: string;
-  duree_min: number;
-  repos: boolean;
-  blocks: SessionBlock[];
-};
-
-type Phase = { label: string; de: number; a: number };
-
-type Program = {
-  nom: string;
-  objectif: string;
-  niveau: string;
-  duree_semaines: number;
-  description: string;
-  phases: Phase[];
-  semaine_courante: number;
-  semaine_libelle: string;
-  sessions: Session[];
-};
-
-const PROGRAMME: Program = {
-  nom: 'Bloc Hyrox — Base 1',
+// TODO: à remplacer par l'état du quiz d'onboarding quand les 10 écrans existeront.
+// En attendant, le profil de la maquette A6 : Hyrox, 5 jours, épaule sensible.
+const PROFIL_DEMO: GeneratorProfile = {
   objectif: 'hyrox',
   niveau: 'intermediaire',
-  duree_semaines: 12,
-  description: 'Construit sur tes benchmarks du 18 août et adapté à ton épaule droite.',
-  phases: [
-    { label: 'Base', de: 1, a: 4 },
-    { label: 'Intensification', de: 5, a: 8 },
-    { label: 'Spécifique', de: 9, a: 12 },
-  ],
-  semaine_courante: 1,
-  semaine_libelle: '4 sept. — 10 sept.',
-  sessions: [
-    {
-      jour: 'Lun',
-      nom: 'Force — Bas du corps',
-      duree_min: 62,
-      repos: false,
-      blocks: [
-        { exercice: 'Back squat', prescription: '4×5' },
-        { exercice: 'RDL', prescription: '3×8' },
-        { exercice: 'Fentes lestées', prescription: '3×10' },
-      ],
-    },
-    {
-      jour: 'Mar',
-      nom: 'Endurance — Seuil',
-      duree_min: 48,
-      repos: false,
-      blocks: [{ exercice: '6×800 m', prescription: "@ 4'12/km · r 90 s" }],
-    },
-    {
-      jour: 'Mer',
-      nom: 'Repos actif',
-      duree_min: 55,
-      repos: true,
-      blocks: [
-        { exercice: 'Mobilité hanches', prescription: '15 min' },
-        { exercice: 'Marche', prescription: '40 min' },
-      ],
-    },
-    {
-      jour: 'Jeu',
-      nom: 'Force — Haut du corps',
-      duree_min: 58,
-      repos: false,
-      blocks: [
-        { exercice: 'Développé couché', prescription: '4×6' },
-        { exercice: 'Tractions lestées', prescription: '4×6' },
-        { exercice: 'Rowing barre', prescription: '4×8' },
-      ],
-    },
-    {
-      jour: 'Ven',
-      nom: 'Hyrox — Compromis',
-      duree_min: 62,
-      repos: false,
-      blocks: [
-        { exercice: '4 tours', prescription: '400 m · 20 wall balls · 15 burpees' },
-      ],
-    },
-    {
-      jour: 'Sam',
-      nom: 'Endurance — Sortie longue',
-      duree_min: 90,
-      repos: false,
-      blocks: [{ exercice: '14 km', prescription: "@ 5'10/km" }],
-    },
-    {
-      jour: 'Dim',
-      nom: 'Repos',
-      duree_min: 0,
-      repos: true,
-      blocks: [],
-    },
-  ],
+  jours_dispo: 5,
+  equipement: 'salle_complete',
+  limitations: ['epaule'],
+  squat_1rm: 140,
+  bench_1rm: 100,
+  deadlift_1rm: 180,
 };
 
-function resumeBlocks(blocks: SessionBlock[]) {
-  return blocks.map((b) => `${b.exercice} ${b.prescription}`.trim()).join(' · ');
+const JOURS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+
+const ZONES: Record<BodyZone, string> = {
+  epaule: 'ton épaule',
+  coude: 'ton coude',
+  poignet: 'ton poignet',
+  dos_bas: 'ton bas du dos',
+  hanche: 'ta hanche',
+  genou: 'ton genou',
+  cheville: 'ta cheville',
+};
+
+/** Résumé d'une séance : « Squat barre 4×6 · Soulevé de terre roumain 3×8 ». */
+function resumeSeance(session: GeneratedSession): string {
+  return session.blocks
+    .map((b) => {
+      if (b.exercise_slug) {
+        const nom = NOM_EXERCICE.get(b.exercise_slug) ?? b.exercise_slug;
+        return b.series && b.reps_cible ? `${nom} ${b.series}×${b.reps_cible}` : nom;
+      }
+      if (b.intervalles) {
+        const i = b.intervalles;
+        return `${i.repetitions}×${i.effort_sec} s · r ${i.recup_sec} s`;
+      }
+      if (b.duree_sec) return `${Math.round(b.duree_sec / 60)} min`;
+      return null;
+    })
+    .filter(Boolean)
+    .join(' · ');
 }
 
-function formatVolume(minutes: number) {
+/**
+ * Les mouvements que le catalogue n'a pas su substituer restent au programme :
+ * ils doivent au minimum être signalés, jamais passer en silence.
+ */
+function alerte(session: GeneratedSession) {
+  const zones = [...new Set(session.blocks.map((b) => b.contre_indication).filter(Boolean))];
+  if (zones.length === 0) return null;
+
+  const n = session.blocks.filter((b) => b.contre_indication).length;
+  const libelle = zones.map((z) => ZONES[z as BodyZone]).join(' et ');
+  return (
+    <Text className="mt-1 text-xs text-warning">
+      {n === 1 ? '1 mouvement sollicite' : `${n} mouvements sollicitent`} {libelle} — à adapter.
+    </Text>
+  );
+}
+
+function formatVolume(minutes: number): string {
   return `${Math.floor(minutes / 60)}h${String(minutes % 60).padStart(2, '0')}`;
 }
 
+/** Le lundi de la semaine en cours, puis le dimanche : « 4 sept. — 10 sept. ». */
+function libelleSemaine(): string {
+  const jour = new Date();
+  const lundi = new Date(jour);
+  lundi.setDate(jour.getDate() - ((jour.getDay() + 6) % 7));
+  const dimanche = new Date(lundi);
+  dimanche.setDate(lundi.getDate() + 6);
+
+  const format = (d: Date) => d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+  return `${format(lundi)} — ${format(dimanche)}`;
+}
+
+function description(profile: GeneratorProfile): string {
+  const base = profile.squat_1rm
+    ? 'Construit sur les charges que tu as déclarées'
+    : 'Construit sur ton niveau déclaré';
+  const zones = profile.limitations.map((z) => ZONES[z]).join(' et ');
+  return zones ? `${base} et adapté à ${zones}.` : `${base}.`;
+}
+
 export default function RevealScreen() {
-  // Dérivé des séances : fréquence et volume ne peuvent pas diverger de la liste.
-  const seances = PROGRAMME.sessions.filter((s) => !s.repos);
-  const volume = formatVolume(seances.reduce((total, s) => total + s.duree_min, 0));
+  const programme = genererProgramme(PROFIL_DEMO);
+
+  if (__DEV__ && programme.warnings.length > 0) {
+    console.warn(
+      `[programGenerator] ${programme.warnings.length} avertissement(s) :\n` +
+        programme.warnings.map((w) => `  [${w.code}] ${w.message}`).join('\n'),
+    );
+  }
+
+  const semaine1 = programme.sessions.filter((s) => s.semaine === 1);
+  const volume = formatVolume(semaine1.reduce((total, s) => total + s.duree_estimee_min, 0));
+
+  // Les jours sans séance sont du repos : la semaine s'affiche en entier.
+  const semaine = JOURS.map((label, i) => ({
+    label,
+    session: semaine1.find((s) => s.jour === i + 1) ?? null,
+  }));
 
   return (
     <View className="flex-1 bg-background">
@@ -132,15 +122,15 @@ export default function RevealScreen() {
           <Text className="mt-4 text-sm font-medium uppercase tracking-wide text-accent">
             Ton plan est prêt
           </Text>
-          <Text className="mt-2 text-3xl font-bold text-text-primary">{PROGRAMME.nom}</Text>
-          <Text className="mt-3 text-xl text-text-secondary">{PROGRAMME.description}</Text>
+          <Text className="mt-2 text-3xl font-bold text-text-primary">{programme.program.nom}</Text>
+          <Text className="mt-3 text-xl text-text-secondary">{description(PROFIL_DEMO)}</Text>
 
           <View className="mt-6 flex-row gap-3">
             <View className="flex-1">
-              <StatBlock label="Durée" value={`${PROGRAMME.duree_semaines} sem.`} />
+              <StatBlock label="Durée" value={`${programme.program.duree_semaines} sem.`} />
             </View>
             <View className="flex-1">
-              <StatBlock label="Fréquence" value={`${seances.length} / sem.`} />
+              <StatBlock label="Fréquence" value={`${programme.program.jours_par_semaine} / sem.`} />
             </View>
             <View className="flex-1">
               <StatBlock label="Volume" value={volume} />
@@ -151,10 +141,8 @@ export default function RevealScreen() {
             Structure du bloc
           </Text>
           <View className="mt-3 flex-row flex-wrap gap-2">
-            {Array.from({ length: PROGRAMME.duree_semaines }, (_, i) => i + 1).map((n) => {
-              // Affichage seul : seule la semaine 1 a des séances tant que le
-              // moteur de génération n'est pas branché.
-              const active = n === PROGRAMME.semaine_courante;
+            {Array.from({ length: programme.program.duree_semaines }, (_, i) => i + 1).map((n) => {
+              const active = n === 1;
               return (
                 <Card
                   key={n}
@@ -171,40 +159,43 @@ export default function RevealScreen() {
             })}
           </View>
           <View className="mt-3 flex-row flex-wrap gap-x-6 gap-y-1">
-            {PROGRAMME.phases.map((p) => (
-              <Text key={p.label} className="text-xs text-text-tertiary">
-                S{p.de}–{p.a} · {p.label}
+            {programme.phases.map((p) => (
+              <Text key={`${p.label}-${p.de}`} className="text-xs text-text-tertiary">
+                {p.de === p.a ? `S${p.de}` : `S${p.de}–${p.a}`} · {p.label}
               </Text>
             ))}
           </View>
 
           <View className="mt-8 flex-row items-baseline justify-between">
             <Text className="text-sm font-medium uppercase tracking-wide text-text-tertiary">
-              Semaine {PROGRAMME.semaine_courante} en détail
+              Semaine 1 en détail
             </Text>
-            <Text className="text-sm text-text-tertiary">{PROGRAMME.semaine_libelle}</Text>
+            <Text className="text-sm text-text-tertiary">{libelleSemaine()}</Text>
           </View>
 
           <View className="mt-3 gap-3">
-            {PROGRAMME.sessions.map((s) => (
-              <Card key={s.jour}>
+            {semaine.map(({ label, session }) => (
+              <Card key={label}>
                 <View className="flex-row items-center">
                   <Text
                     className={`w-12 text-sm font-medium uppercase tracking-wide ${
-                      s.repos ? 'text-text-tertiary' : 'text-accent'
+                      session ? 'text-accent' : 'text-text-tertiary'
                     }`}>
-                    {s.jour}
+                    {label}
                   </Text>
                   <View className="flex-1 pr-3">
-                    <Text className="text-xl font-semibold text-text-primary">{s.nom}</Text>
-                    {s.blocks.length > 0 ? (
+                    <Text className="text-xl font-semibold text-text-primary">
+                      {session ? session.nom : 'Repos'}
+                    </Text>
+                    {session ? (
                       <Text className="mt-1 text-base text-text-secondary">
-                        {resumeBlocks(s.blocks)}
+                        {resumeSeance(session)}
                       </Text>
                     ) : null}
+                    {session ? alerte(session) : null}
                   </View>
                   <Text className="text-base text-text-secondary">
-                    {s.duree_min > 0 ? `${s.duree_min} min` : '—'}
+                    {session ? `${session.duree_estimee_min} min` : '—'}
                   </Text>
                 </View>
               </Card>

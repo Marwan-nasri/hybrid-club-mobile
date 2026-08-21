@@ -10,6 +10,7 @@ module.exports = {
         border: '#2A2A2E',
         text: { primary: '#FAFAFA', secondary: '#8A8A8F', tertiary: '#5A5A60' },
         accent: '#D4F227',
+        warning: '#F59E0B',
       },
       borderRadius: { card: '12px', sheet: '20px', pill: '9999px' },
     },

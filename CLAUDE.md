@@ -38,6 +38,9 @@ N'utiliser QUE ces classes, jamais de couleur en dur :
 | Texte secondaire | `text-text-secondary` | `#8A8A8F` |
 | Labels, tertiaire | `text-text-tertiary` | `#5A5A60` |
 | **Accent** | `bg-accent` / `text-accent` | `#D4F227` |
+| Avertissement | `text-warning` | `#F59E0B` |
+
+`text-warning` est réservé aux contre-indications (mouvement qui sollicite une zone déclarée en limitation). Jamais en fond, jamais avec une icône.
 
 **Règle absolue sur l'accent :** une seule action accent par écran. Si un écran a deux boutons `bg-accent`, c'est une erreur.
 
@@ -117,6 +120,10 @@ Séparation stricte entre le **prescrit** (`programs`, `sessions`, `session_bloc
 
 La substitution pour blessures (`limitations[]` → `substituts[]`) est un différenciateur produit, pas une option — la traiter avec soin.
 
+Le catalogue d'exercices est **embarqué dans l'app**, pas lu en base : le reveal (A6) et le paywall (A7) sont pré-authentification, et la RLS de `exercises` exige un utilisateur connecté. Un aller-retour réseau à cet endroit serait un point de friction au pire moment du funnel.
+
+**Si tu modifies le seed `exercises` ou `exercise_substitutions` dans `supabase/migrations/`, relance `npm run build:catalogue`.** Le script régénère `src/lib/exercises.generated.json` depuis les migrations — sans ça, l'app continue de tourner sur l'ancien catalogue. Ne jamais éditer ce JSON à la main.
+
 ## Conventions de code
 
 - TypeScript strict, types explicites sur les props de composants
@@ -134,6 +141,17 @@ La substitution pour blessures (`limitations[]` → `substituts[]`) est un diff�
 4. **Données réalistes dans les mocks** : vrais noms d'exercices, charges cohérentes (100 kg au squat), allures plausibles (4'45/km). Jamais de "Lorem ipsum" ni de "Exercice 1".
 5. **Pas de dépendance ajoutée sans validation.** Proposer, expliquer pourquoi, attendre l'accord.
 
+## Chantiers ouverts
+- Profondeur table de substitution : 28 trous restants (épaule 9, dos_bas 7, 
+  genou 6). Nécessite d'élargir le catalogue, pas seulement d'ajouter des 
+  lignes — certains manques sont structurels (aucun squat sans genou hors 
+  leg-press). À traiter comme un chantier dédié.
+- Migration 002 : la ligne seated-calf-raise → plank est mal pensée 
+  (substitution qui change la nature du mouvement). À corriger.
+- Insertion Supabase du programme généré : pas encore branchée, le moteur 
+  ne calcule qu'en mémoire.
+- PROFIL_DEMO codé en dur dans reveal.tsx, à remplacer par l'état du quiz.
+
 ## État d'avancement
 
 - [x] Environnement Mac (Xcode, simulateur, Homebrew, Watchman, EAS CLI)
@@ -142,7 +160,7 @@ La substitution pour blessures (`limitations[]` → `substituts[]`) est un diff�
 - [ ] Config NativeWind (tailwind.config, babel, metro, global.css)
 - [ ] Schéma Supabase + RLS
 - [ ] Les 6 composants de base
-- [ ] Moteur de génération de programme
+- [x] Moteur de génération de programme
 - [ ] Écran de séance live
 - [ ] Onboarding + paywall
 - [ ] RevenueCat

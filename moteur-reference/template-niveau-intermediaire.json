@@ -1,0 +1,126 @@
+{
+  "template_id": "niveau-intermediaire",
+  "niveau": "intermediaire",
+
+  "note_architecture": "Ce template n'est plus lié à un objectif unique. Il contient un pool de 6 types de séance. Le moteur sélectionne les N premiers types selon jours_dispo (2 à 6), dans l'ordre de priorité propre à l'objectif de l'utilisateur (voir objectif_modifiers). Les blessures et l'équipement continuent d'agir par la table exercise_substitutions, indépendamment de ce choix.",
+
+  "selection_rule": "jours_dispo = N → prendre les N premiers ids de la liste 'ordre' correspondant à l'objectif déclaré dans objectif_modifiers. Si N > 6, répéter le cycle en insérant un jour de repos actif.",
+
+  "pool_jours": [
+    {
+      "id": "force_bas",
+      "nom": "Force — Bas du corps",
+      "type": "muscu",
+      "duree_estimee_min": 55,
+      "note": "Squat et chaîne postérieure — la base de puissance transférable à la majorité des objectifs.",
+      "blocs_semaine_1": [
+        { "exercise_slug": "back-squat", "ordre": 1, "series": 4, "reps_cible": "6", "pct_1rm": 65, "rpe": 6, "repos_sec": 150 },
+        { "exercise_slug": "romanian-deadlift", "ordre": 2, "series": 3, "reps_cible": "8", "rpe": 6, "repos_sec": 120 },
+        { "exercise_slug": "bulgarian-split-squat", "ordre": 3, "series": 3, "reps_cible": "10 par jambe", "rpe": 6, "repos_sec": 90 },
+        { "exercise_slug": "hip-thrust", "ordre": 4, "series": 3, "reps_cible": "12", "rpe": 6, "repos_sec": 90 },
+        { "exercise_slug": "plank", "ordre": 5, "series": 3, "reps_cible": "45 sec", "rpe": 6, "repos_sec": 60 }
+      ]
+    },
+    {
+      "id": "force_haut",
+      "nom": "Force — Haut du corps",
+      "type": "muscu",
+      "duree_estimee_min": 55,
+      "note": "Push et pull équilibrés.",
+      "blocs_semaine_1": [
+        { "exercise_slug": "bench-press", "ordre": 1, "series": 4, "reps_cible": "6", "pct_1rm": 65, "rpe": 6, "repos_sec": 150 },
+        { "exercise_slug": "barbell-row", "ordre": 2, "series": 4, "reps_cible": "8", "rpe": 6, "repos_sec": 120 },
+        { "exercise_slug": "overhead-press", "ordre": 3, "series": 3, "reps_cible": "8", "rpe": 6, "repos_sec": 100 },
+        { "exercise_slug": "lat-pulldown", "ordre": 4, "series": 3, "reps_cible": "10", "rpe": 6, "repos_sec": 90 },
+        { "exercise_slug": "triceps-pushdown", "ordre": 5, "series": 3, "reps_cible": "12", "rpe": 6, "repos_sec": 60 },
+        { "exercise_slug": "hammer-curl", "ordre": 6, "series": 3, "reps_cible": "12", "rpe": 6, "repos_sec": 60 }
+      ]
+    },
+    {
+      "id": "cardio_engine",
+      "nom": "Cardio — Engine",
+      "type": "cardio",
+      "duree_estimee_min": 45,
+      "note": "Travail au seuil. Alterner course et rameur d'une semaine à l'autre.",
+      "blocs_semaine_1": [
+        { "ordre": 1, "cardio_type": "course", "intervalles": { "effort_sec": 60, "recup_sec": 90, "repetitions": 8 }, "notes": "Effort soutenu, zone 4" },
+        { "exercise_slug": "kettlebell-swing", "ordre": 2, "series": 4, "reps_cible": "15", "rpe": 7, "repos_sec": 60 },
+        { "exercise_slug": "wall-ball", "ordre": 3, "series": 4, "reps_cible": "15", "rpe": 7, "repos_sec": 60 }
+      ]
+    },
+    {
+      "id": "fonctionnel",
+      "nom": "Fonctionnel — Force & portage",
+      "type": "hybride",
+      "duree_estimee_min": 50,
+      "note": "Mouvements de portage et de poussée au sol. Technique avant charge.",
+      "blocs_semaine_1": [
+        { "exercise_slug": "sled-push", "ordre": 1, "series": 4, "reps_cible": "20m", "rpe": 7, "repos_sec": 90 },
+        { "exercise_slug": "farmers-carry", "ordre": 2, "series": 4, "reps_cible": "40m", "rpe": 7, "repos_sec": 90 },
+        { "exercise_slug": "sandbag-lunge", "ordre": 3, "series": 3, "reps_cible": "12 par jambe", "rpe": 7, "repos_sec": 90 },
+        { "exercise_slug": "burpee-broad-jump", "ordre": 4, "series": 3, "reps_cible": "10", "rpe": 7, "repos_sec": 90 },
+        { "exercise_slug": "sled-pull", "ordre": 5, "series": 3, "reps_cible": "20m", "rpe": 7, "repos_sec": 90 }
+      ]
+    },
+    {
+      "id": "endurance_longue",
+      "nom": "Endurance longue",
+      "type": "hybride",
+      "duree_estimee_min": 50,
+      "note": "Zone 2 uniquement — allure conversationnelle.",
+      "blocs_semaine_1": [
+        { "ordre": 1, "cardio_type": "course", "duree_sec": 2100, "notes": "35 min, zone 2" },
+        { "exercise_slug": "romanian-deadlift", "ordre": 2, "series": 3, "reps_cible": "10", "rpe": 5, "repos_sec": 90, "notes": "Charge légère, focus technique" },
+        { "exercise_slug": "hanging-leg-raise", "ordre": 3, "series": 3, "reps_cible": "12", "rpe": 6, "repos_sec": 60 },
+        { "exercise_slug": "ab-wheel", "ordre": 4, "series": 3, "reps_cible": "10", "rpe": 6, "repos_sec": 60 }
+      ]
+    },
+    {
+      "id": "renfort_cible",
+      "nom": "Renfort ciblé & mobilité",
+      "type": "muscu",
+      "duree_estimee_min": 40,
+      "note": "Volume d'accessoire — utile pour la récupération active et l'hypertrophie complémentaire.",
+      "blocs_semaine_1": [
+        { "exercise_slug": "dumbbell-shoulder-press", "ordre": 1, "series": 3, "reps_cible": "12", "rpe": 6, "repos_sec": 75 },
+        { "exercise_slug": "cable-fly", "ordre": 2, "series": 3, "reps_cible": "12", "rpe": 6, "repos_sec": 60 },
+        { "exercise_slug": "hammer-curl", "ordre": 3, "series": 3, "reps_cible": "12", "rpe": 6, "repos_sec": 60 },
+        { "exercise_slug": "triceps-pushdown", "ordre": 4, "series": 3, "reps_cible": "12", "rpe": 6, "repos_sec": 60 },
+        { "exercise_slug": "ab-wheel", "ordre": 5, "series": 3, "reps_cible": "10", "rpe": 6, "repos_sec": 60 },
+        { "exercise_slug": "standing-calf-raise", "ordre": 6, "series": 3, "reps_cible": "15", "rpe": 6, "repos_sec": 45 }
+      ]
+    }
+  ],
+
+  "objectif_modifiers": {
+    "hyrox": {
+      "ordre": ["force_bas", "force_haut", "cardio_engine", "fonctionnel", "endurance_longue", "renfort_cible"],
+      "ratio_muscu_cardio": 50,
+      "note_coaching": "Priorité à l'engine et aux mouvements fonctionnels — c'est ce qui fait la différence le jour de la course."
+    },
+    "recomposition": {
+      "ordre": ["force_bas", "force_haut", "renfort_cible", "cardio_engine", "fonctionnel", "endurance_longue"],
+      "ratio_muscu_cardio": 70,
+      "note_coaching": "Priorité au volume de musculation — le cardio soutient la dépense énergétique sans cannibaliser la récupération."
+    },
+    "performance": {
+      "ordre": ["force_bas", "force_haut", "renfort_cible", "endurance_longue", "cardio_engine", "fonctionnel"],
+      "ratio_muscu_cardio": 75,
+      "note_coaching": "Priorité à la force et à l'accessoire — le cardio reste présent mais ne prend jamais le pas sur la charge."
+    },
+    "marathon_muscu": {
+      "ordre": ["endurance_longue", "cardio_engine", "force_bas", "force_haut", "fonctionnel", "renfort_cible"],
+      "ratio_muscu_cardio": 35,
+      "note_coaching": "Priorité à l'endurance — la musculation sert de maintien et de prévention des blessures de course."
+    }
+  },
+
+  "progression": {
+    "phase_1_accumulation": { "semaines": [1, 2, 3], "pct_1rm": [65, 68, 72], "rpe": [6, 6, 7], "volume_modifier": 1.0 },
+    "deload_1": { "semaines": [4], "pct_1rm": [58], "rpe": [5], "volume_modifier": 0.6 },
+    "phase_2_intensification": { "semaines": [5, 6, 7], "pct_1rm": [75, 78, 82], "rpe": [7, 7, 8], "volume_modifier": 0.9 },
+    "deload_2": { "semaines": [8], "pct_1rm": [65], "rpe": [5], "volume_modifier": 0.6 },
+    "phase_3_peak": { "semaines": [9, 10, 11], "pct_1rm": [82, 86, 90], "rpe": [8, 8, 9], "volume_modifier": 0.75 },
+    "taper": { "semaines": [12], "pct_1rm": [70], "rpe": [6], "volume_modifier": 0.5 }
+  }
+}

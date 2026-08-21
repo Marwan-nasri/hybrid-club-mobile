@@ -1,0 +1,880 @@
+{
+  "exercises": [
+    {
+      "slug": "back-squat",
+      "nom": "Squat barre",
+      "pattern": "squat",
+      "equipement_requis": "salle_complete",
+      "zones_sollicitees": [
+        "genou",
+        "dos_bas",
+        "hanche"
+      ]
+    },
+    {
+      "slug": "front-squat",
+      "nom": "Squat avant",
+      "pattern": "squat",
+      "equipement_requis": "salle_complete",
+      "zones_sollicitees": [
+        "genou",
+        "poignet",
+        "epaule"
+      ]
+    },
+    {
+      "slug": "goblet-squat",
+      "nom": "Goblet squat",
+      "pattern": "squat",
+      "equipement_requis": "halteres_seuls",
+      "zones_sollicitees": [
+        "genou"
+      ]
+    },
+    {
+      "slug": "leg-press",
+      "nom": "Presse à cuisses",
+      "pattern": "squat",
+      "equipement_requis": "salle_complete",
+      "zones_sollicitees": [
+        "genou"
+      ]
+    },
+    {
+      "slug": "bulgarian-split-squat",
+      "nom": "Fente bulgare",
+      "pattern": "lunge",
+      "equipement_requis": "halteres_seuls",
+      "zones_sollicitees": [
+        "genou",
+        "hanche"
+      ]
+    },
+    {
+      "slug": "air-squat",
+      "nom": "Squat au poids du corps",
+      "pattern": "squat",
+      "equipement_requis": "poids_corps",
+      "zones_sollicitees": [
+        "genou"
+      ]
+    },
+    {
+      "slug": "deadlift",
+      "nom": "Soulevé de terre",
+      "pattern": "hinge",
+      "equipement_requis": "salle_complete",
+      "zones_sollicitees": [
+        "dos_bas",
+        "hanche"
+      ]
+    },
+    {
+      "slug": "romanian-deadlift",
+      "nom": "Soulevé de terre roumain",
+      "pattern": "hinge",
+      "equipement_requis": "salle_complete",
+      "zones_sollicitees": [
+        "dos_bas",
+        "hanche"
+      ]
+    },
+    {
+      "slug": "trap-bar-deadlift",
+      "nom": "Soulevé de terre trap bar",
+      "pattern": "hinge",
+      "equipement_requis": "salle_complete",
+      "zones_sollicitees": [
+        "dos_bas"
+      ]
+    },
+    {
+      "slug": "hip-thrust",
+      "nom": "Hip thrust",
+      "pattern": "hinge",
+      "equipement_requis": "salle_complete",
+      "zones_sollicitees": [
+        "hanche"
+      ]
+    },
+    {
+      "slug": "kettlebell-swing",
+      "nom": "Kettlebell swing",
+      "pattern": "hinge",
+      "equipement_requis": "halteres_seuls",
+      "zones_sollicitees": [
+        "dos_bas",
+        "hanche"
+      ]
+    },
+    {
+      "slug": "back-extension",
+      "nom": "Extension lombaire",
+      "pattern": "hinge",
+      "equipement_requis": "salle_complete",
+      "zones_sollicitees": [
+        "dos_bas"
+      ]
+    },
+    {
+      "slug": "bench-press",
+      "nom": "Développé couché",
+      "pattern": "push_horizontal",
+      "equipement_requis": "salle_complete",
+      "zones_sollicitees": [
+        "epaule",
+        "coude"
+      ]
+    },
+    {
+      "slug": "incline-bench-press",
+      "nom": "Développé incliné",
+      "pattern": "push_horizontal",
+      "equipement_requis": "salle_complete",
+      "zones_sollicitees": [
+        "epaule",
+        "coude"
+      ]
+    },
+    {
+      "slug": "dumbbell-bench-press",
+      "nom": "Développé couché haltères",
+      "pattern": "push_horizontal",
+      "equipement_requis": "halteres_seuls",
+      "zones_sollicitees": [
+        "epaule",
+        "coude"
+      ]
+    },
+    {
+      "slug": "push-up",
+      "nom": "Pompes",
+      "pattern": "push_horizontal",
+      "equipement_requis": "poids_corps",
+      "zones_sollicitees": [
+        "epaule",
+        "poignet",
+        "coude"
+      ]
+    },
+    {
+      "slug": "chest-press-machine",
+      "nom": "Développé machine",
+      "pattern": "push_horizontal",
+      "equipement_requis": "salle_complete",
+      "zones_sollicitees": [
+        "epaule"
+      ]
+    },
+    {
+      "slug": "cable-fly",
+      "nom": "Écarté poulie",
+      "pattern": "isolation",
+      "equipement_requis": "salle_complete",
+      "zones_sollicitees": [
+        "epaule"
+      ]
+    },
+    {
+      "slug": "overhead-press",
+      "nom": "Développé militaire",
+      "pattern": "push_vertical",
+      "equipement_requis": "salle_complete",
+      "zones_sollicitees": [
+        "epaule",
+        "coude",
+        "dos_bas"
+      ]
+    },
+    {
+      "slug": "dumbbell-shoulder-press",
+      "nom": "Développé épaules haltères",
+      "pattern": "push_vertical",
+      "equipement_requis": "halteres_seuls",
+      "zones_sollicitees": [
+        "epaule",
+        "coude"
+      ]
+    },
+    {
+      "slug": "landmine-press",
+      "nom": "Landmine press",
+      "pattern": "push_vertical",
+      "equipement_requis": "salle_complete",
+      "zones_sollicitees": [
+        "epaule"
+      ]
+    },
+    {
+      "slug": "lateral-raise",
+      "nom": "Élévations latérales",
+      "pattern": "isolation",
+      "equipement_requis": "halteres_seuls",
+      "zones_sollicitees": [
+        "epaule"
+      ]
+    },
+    {
+      "slug": "barbell-row",
+      "nom": "Rowing barre",
+      "pattern": "pull_horizontal",
+      "equipement_requis": "salle_complete",
+      "zones_sollicitees": [
+        "dos_bas",
+        "coude"
+      ]
+    },
+    {
+      "slug": "dumbbell-row",
+      "nom": "Rowing haltère",
+      "pattern": "pull_horizontal",
+      "equipement_requis": "halteres_seuls",
+      "zones_sollicitees": [
+        "coude"
+      ]
+    },
+    {
+      "slug": "cable-row",
+      "nom": "Rowing poulie basse",
+      "pattern": "pull_horizontal",
+      "equipement_requis": "salle_complete",
+      "zones_sollicitees": [
+        "coude"
+      ]
+    },
+    {
+      "slug": "chest-supported-row",
+      "nom": "Rowing buste soutenu",
+      "pattern": "pull_horizontal",
+      "equipement_requis": "salle_complete",
+      "zones_sollicitees": [
+        "coude"
+      ]
+    },
+    {
+      "slug": "inverted-row",
+      "nom": "Rowing australien",
+      "pattern": "pull_horizontal",
+      "equipement_requis": "poids_corps",
+      "zones_sollicitees": [
+        "coude"
+      ]
+    },
+    {
+      "slug": "pull-up",
+      "nom": "Tractions",
+      "pattern": "pull_vertical",
+      "equipement_requis": "poids_corps",
+      "zones_sollicitees": [
+        "epaule",
+        "coude"
+      ]
+    },
+    {
+      "slug": "lat-pulldown",
+      "nom": "Tirage vertical",
+      "pattern": "pull_vertical",
+      "equipement_requis": "salle_complete",
+      "zones_sollicitees": [
+        "epaule",
+        "coude"
+      ]
+    },
+    {
+      "slug": "assisted-pull-up",
+      "nom": "Tractions assistées",
+      "pattern": "pull_vertical",
+      "equipement_requis": "salle_complete",
+      "zones_sollicitees": [
+        "epaule",
+        "coude"
+      ]
+    },
+    {
+      "slug": "barbell-curl",
+      "nom": "Curl barre",
+      "pattern": "isolation",
+      "equipement_requis": "salle_complete",
+      "zones_sollicitees": [
+        "coude",
+        "poignet"
+      ]
+    },
+    {
+      "slug": "hammer-curl",
+      "nom": "Curl marteau",
+      "pattern": "isolation",
+      "equipement_requis": "halteres_seuls",
+      "zones_sollicitees": [
+        "coude"
+      ]
+    },
+    {
+      "slug": "triceps-pushdown",
+      "nom": "Extension triceps poulie",
+      "pattern": "isolation",
+      "equipement_requis": "salle_complete",
+      "zones_sollicitees": [
+        "coude"
+      ]
+    },
+    {
+      "slug": "overhead-triceps-extension",
+      "nom": "Extension triceps nuque",
+      "pattern": "isolation",
+      "equipement_requis": "halteres_seuls",
+      "zones_sollicitees": [
+        "coude",
+        "epaule"
+      ]
+    },
+    {
+      "slug": "dips",
+      "nom": "Dips",
+      "pattern": "push_horizontal",
+      "equipement_requis": "poids_corps",
+      "zones_sollicitees": [
+        "epaule",
+        "coude"
+      ]
+    },
+    {
+      "slug": "close-grip-bench",
+      "nom": "Développé couché prise serrée",
+      "pattern": "push_horizontal",
+      "equipement_requis": "salle_complete",
+      "zones_sollicitees": [
+        "coude",
+        "epaule"
+      ]
+    },
+    {
+      "slug": "farmers-carry",
+      "nom": "Farmer's carry",
+      "pattern": "carry",
+      "equipement_requis": "halteres_seuls",
+      "zones_sollicitees": [
+        "poignet",
+        "dos_bas"
+      ]
+    },
+    {
+      "slug": "sled-push",
+      "nom": "Poussée de traîneau",
+      "pattern": "carry",
+      "equipement_requis": "salle_complete",
+      "zones_sollicitees": [
+        "genou"
+      ]
+    },
+    {
+      "slug": "sled-pull",
+      "nom": "Tirage de traîneau",
+      "pattern": "carry",
+      "equipement_requis": "salle_complete",
+      "zones_sollicitees": [
+        "dos_bas"
+      ]
+    },
+    {
+      "slug": "sandbag-lunge",
+      "nom": "Fente sandbag",
+      "pattern": "lunge",
+      "equipement_requis": "salle_complete",
+      "zones_sollicitees": [
+        "genou",
+        "dos_bas"
+      ]
+    },
+    {
+      "slug": "wall-ball",
+      "nom": "Wall ball",
+      "pattern": "squat",
+      "equipement_requis": "salle_complete",
+      "zones_sollicitees": [
+        "genou",
+        "epaule"
+      ]
+    },
+    {
+      "slug": "burpee-broad-jump",
+      "nom": "Burpee broad jump",
+      "pattern": "core",
+      "equipement_requis": "poids_corps",
+      "zones_sollicitees": [
+        "genou",
+        "poignet",
+        "epaule"
+      ]
+    },
+    {
+      "slug": "plank",
+      "nom": "Gainage",
+      "pattern": "core",
+      "equipement_requis": "poids_corps",
+      "zones_sollicitees": [
+        "epaule",
+        "dos_bas"
+      ]
+    },
+    {
+      "slug": "hanging-leg-raise",
+      "nom": "Relevé de jambes suspendu",
+      "pattern": "core",
+      "equipement_requis": "poids_corps",
+      "zones_sollicitees": [
+        "epaule"
+      ]
+    },
+    {
+      "slug": "ab-wheel",
+      "nom": "Roue abdominale",
+      "pattern": "core",
+      "equipement_requis": "halteres_seuls",
+      "zones_sollicitees": [
+        "dos_bas",
+        "epaule"
+      ]
+    },
+    {
+      "slug": "standing-calf-raise",
+      "nom": "Extension mollets debout",
+      "pattern": "isolation",
+      "equipement_requis": "salle_complete",
+      "zones_sollicitees": [
+        "cheville"
+      ]
+    },
+    {
+      "slug": "seated-calf-raise",
+      "nom": "Extension mollets assis",
+      "pattern": "isolation",
+      "equipement_requis": "salle_complete",
+      "zones_sollicitees": [
+        "cheville"
+      ]
+    },
+    {
+      "slug": "dead-bug",
+      "nom": "Dead bug",
+      "pattern": "core",
+      "equipement_requis": "poids_corps",
+      "zones_sollicitees": [
+        "dos_bas"
+      ]
+    },
+    {
+      "slug": "straight-arm-pulldown",
+      "nom": "Tirage bras tendus",
+      "pattern": "pull_vertical",
+      "equipement_requis": "salle_complete",
+      "zones_sollicitees": [
+        "epaule"
+      ]
+    }
+  ],
+  "substitutions": [
+    {
+      "exercise_slug": "bench-press",
+      "substitut_slug": "chest-press-machine",
+      "raison": "limitation_epaule",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "overhead-press",
+      "substitut_slug": "landmine-press",
+      "raison": "limitation_epaule",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "incline-bench-press",
+      "substitut_slug": "chest-press-machine",
+      "raison": "limitation_epaule",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "pull-up",
+      "substitut_slug": "lat-pulldown",
+      "raison": "limitation_epaule",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "dips",
+      "substitut_slug": "triceps-pushdown",
+      "raison": "limitation_epaule",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "push-up",
+      "substitut_slug": "chest-press-machine",
+      "raison": "limitation_epaule",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "close-grip-bench",
+      "substitut_slug": "chest-press-machine",
+      "raison": "limitation_coude",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "overhead-triceps-extension",
+      "substitut_slug": "triceps-pushdown",
+      "raison": "limitation_coude",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "dips",
+      "substitut_slug": "chest-press-machine",
+      "raison": "limitation_coude",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "barbell-curl",
+      "substitut_slug": "hammer-curl",
+      "raison": "limitation_coude",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "barbell-row",
+      "substitut_slug": "chest-supported-row",
+      "raison": "limitation_coude",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "deadlift",
+      "substitut_slug": "hip-thrust",
+      "raison": "limitation_dos_bas",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "barbell-row",
+      "substitut_slug": "chest-supported-row",
+      "raison": "limitation_dos_bas",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "back-squat",
+      "substitut_slug": "leg-press",
+      "raison": "limitation_dos_bas",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "overhead-press",
+      "substitut_slug": "dumbbell-shoulder-press",
+      "raison": "limitation_dos_bas",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "romanian-deadlift",
+      "substitut_slug": "back-extension",
+      "raison": "limitation_dos_bas",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "back-squat",
+      "substitut_slug": "leg-press",
+      "raison": "limitation_genou",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "bulgarian-split-squat",
+      "substitut_slug": "hip-thrust",
+      "raison": "limitation_genou",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "wall-ball",
+      "substitut_slug": "kettlebell-swing",
+      "raison": "limitation_genou",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "burpee-broad-jump",
+      "substitut_slug": "plank",
+      "raison": "limitation_genou",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "sandbag-lunge",
+      "substitut_slug": "romanian-deadlift",
+      "raison": "limitation_genou",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "back-squat",
+      "substitut_slug": "goblet-squat",
+      "raison": "equipement_absent",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "bench-press",
+      "substitut_slug": "dumbbell-bench-press",
+      "raison": "equipement_absent",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "barbell-row",
+      "substitut_slug": "dumbbell-row",
+      "raison": "equipement_absent",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "lat-pulldown",
+      "substitut_slug": "pull-up",
+      "raison": "equipement_absent",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "cable-row",
+      "substitut_slug": "dumbbell-row",
+      "raison": "equipement_absent",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "leg-press",
+      "substitut_slug": "bulgarian-split-squat",
+      "raison": "equipement_absent",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "triceps-pushdown",
+      "substitut_slug": "overhead-triceps-extension",
+      "raison": "equipement_absent",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "deadlift",
+      "substitut_slug": "kettlebell-swing",
+      "raison": "equipement_absent",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "front-squat",
+      "substitut_slug": "goblet-squat",
+      "raison": "limitation_poignet",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "push-up",
+      "substitut_slug": "chest-press-machine",
+      "raison": "limitation_poignet",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "barbell-curl",
+      "substitut_slug": "hammer-curl",
+      "raison": "limitation_poignet",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "farmers-carry",
+      "substitut_slug": "sled-push",
+      "raison": "limitation_poignet",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "burpee-broad-jump",
+      "substitut_slug": "kettlebell-swing",
+      "raison": "limitation_poignet",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "back-squat",
+      "substitut_slug": "leg-press",
+      "raison": "limitation_hanche",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "bulgarian-split-squat",
+      "substitut_slug": "leg-press",
+      "raison": "limitation_hanche",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "deadlift",
+      "substitut_slug": "back-extension",
+      "raison": "limitation_hanche",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "romanian-deadlift",
+      "substitut_slug": "back-extension",
+      "raison": "limitation_hanche",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "hip-thrust",
+      "substitut_slug": "leg-press",
+      "raison": "limitation_hanche",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "kettlebell-swing",
+      "substitut_slug": "sled-push",
+      "raison": "limitation_hanche",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "standing-calf-raise",
+      "substitut_slug": "seated-calf-raise",
+      "raison": "limitation_cheville",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "seated-calf-raise",
+      "substitut_slug": "plank",
+      "raison": "limitation_cheville",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "romanian-deadlift",
+      "substitut_slug": "kettlebell-swing",
+      "raison": "equipement_absent",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "hip-thrust",
+      "substitut_slug": "bulgarian-split-squat",
+      "raison": "equipement_absent",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "overhead-press",
+      "substitut_slug": "dumbbell-shoulder-press",
+      "raison": "equipement_absent",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "sled-push",
+      "substitut_slug": "burpee-broad-jump",
+      "raison": "equipement_absent",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "wall-ball",
+      "substitut_slug": "kettlebell-swing",
+      "raison": "equipement_absent",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "plank",
+      "substitut_slug": "dead-bug",
+      "raison": "limitation_epaule",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "hanging-leg-raise",
+      "substitut_slug": "dead-bug",
+      "raison": "limitation_epaule",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "lat-pulldown",
+      "substitut_slug": "chest-supported-row",
+      "raison": "limitation_epaule",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "wall-ball",
+      "substitut_slug": "kettlebell-swing",
+      "raison": "limitation_epaule",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "bench-press",
+      "substitut_slug": "chest-press-machine",
+      "raison": "limitation_coude",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "push-up",
+      "substitut_slug": "chest-press-machine",
+      "raison": "limitation_coude",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "overhead-press",
+      "substitut_slug": "landmine-press",
+      "raison": "limitation_coude",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "dumbbell-shoulder-press",
+      "substitut_slug": "landmine-press",
+      "raison": "limitation_coude",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "lat-pulldown",
+      "substitut_slug": "straight-arm-pulldown",
+      "raison": "limitation_coude",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "pull-up",
+      "substitut_slug": "straight-arm-pulldown",
+      "raison": "limitation_coude",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "inverted-row",
+      "substitut_slug": "straight-arm-pulldown",
+      "raison": "limitation_coude",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "barbell-row",
+      "substitut_slug": "straight-arm-pulldown",
+      "raison": "limitation_coude",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "triceps-pushdown",
+      "substitut_slug": "lateral-raise",
+      "raison": "limitation_coude",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "hammer-curl",
+      "substitut_slug": "lateral-raise",
+      "raison": "limitation_coude",
+      "priorite": 1
+    },
+    {
+      "exercise_slug": "bench-press",
+      "substitut_slug": "cable-fly",
+      "raison": "limitation_coude",
+      "priorite": 2
+    },
+    {
+      "exercise_slug": "push-up",
+      "substitut_slug": "cable-fly",
+      "raison": "limitation_coude",
+      "priorite": 2
+    },
+    {
+      "exercise_slug": "dips",
+      "substitut_slug": "cable-fly",
+      "raison": "limitation_coude",
+      "priorite": 2
+    },
+    {
+      "exercise_slug": "close-grip-bench",
+      "substitut_slug": "cable-fly",
+      "raison": "limitation_coude",
+      "priorite": 2
+    },
+    {
+      "exercise_slug": "lat-pulldown",
+      "substitut_slug": "lateral-raise",
+      "raison": "limitation_coude",
+      "priorite": 2
+    },
+    {
+      "exercise_slug": "pull-up",
+      "substitut_slug": "lateral-raise",
+      "raison": "limitation_coude",
+      "priorite": 2
+    }
+  ]
+}

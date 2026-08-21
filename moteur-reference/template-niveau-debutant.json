@@ -1,0 +1,154 @@
+{
+  "template_id": "niveau-debutant",
+  "niveau": "debutant",
+
+  "note_architecture": "Comme pour l'intermédiaire, un pool de 6 types de séance. Le moteur prend les N premiers selon jours_dispo. Contrairement à l'intermédiaire, la progression n'est pas qu'une question d'intensité (%1RM) : elle suit 3 phases qui ajoutent des mouvements progressivement. Ces phases s'appliquent quel que soit l'objectif — un débutant a besoin des mêmes fondations avant de se spécialiser.",
+
+  "selection_rule": "jours_dispo = N → prendre les N premiers ids de la liste 'ordre' correspondant à l'objectif déclaré dans objectif_modifiers.",
+
+  "phases": {
+    "phase_A_fondations": {
+      "semaines": [1, 2, 3, 4],
+      "objectif": "Maîtriser les patterns au poids du corps ou charge très légère. Aucun %1RM.",
+      "regle_progression": "+1 à 2 répétitions par semaine, ou +2-3 min de cardio. Jamais de charge ajoutée avant technique fluide."
+    },
+    "phase_B_introduction_fonctionnelle": {
+      "semaines": [5, 6, 7, 8],
+      "objectif": "Ajout des mouvements fonctionnels de base par-dessus les fondamentaux.",
+      "ajouts": ["kettlebell-swing (léger)", "farmers-carry (charge modérée)"],
+      "regle_progression": "Même logique. Le kettlebell swing démarre très léger, la technique de hanche prime."
+    },
+    "phase_C_premiere_specialisation": {
+      "semaines": [9, 10, 11, 12],
+      "objectif": "Premier contact avec des mouvements plus exigeants, à faible volume. Semaine 12 : mini-enchaînement encadré, sans notion de performance.",
+      "ajouts": ["wall-ball (léger)", "sled-push (charge très légère, uniquement si objectif hyrox/fonctionnel)"],
+      "regle_progression": "Semaine 12 : 3-4 mouvements enchaînés à allure confortable, pour habituer mentalement à l'idée d'un enchaînement."
+    }
+  },
+
+  "progression": {
+    "regle": "Ces valeurs s'ADDITIONNENT au chiffre de base indiqué dans blocs_semaine_1 pour chaque exercice de type reps, durée (sec) ou distance (m). Aucun %1RM à aucun moment de ce niveau. Semaine 4, 8 et 12 : pas d'ajout supplémentaire, on consolide ce qui a été gagné avant le changement de phase.",
+    "phase_A_fondations": {
+      "semaines": [1, 2, 3, 4],
+      "increment_reps": [0, 1, 2, 2],
+      "increment_duree_sec": [0, 5, 10, 10],
+      "increment_distance_m": [0, 5, 10, 10],
+      "increment_cardio_min": [0, 2, 4, 4]
+    },
+    "phase_B_introduction_fonctionnelle": {
+      "semaines": [5, 6, 7, 8],
+      "increment_reps": [0, 1, 1, 1],
+      "increment_duree_sec": [0, 5, 5, 5],
+      "increment_distance_m": [0, 5, 5, 5],
+      "increment_cardio_min": [0, 2, 2, 2],
+      "note": "Les incréments repartent à 0 en semaine 5 car de nouveaux mouvements viennent d'être introduits (kettlebell-swing, farmers-carry renforcé) — on ne cumule pas la progression de la phase A sur un mouvement que l'utilisateur découvre à peine."
+    },
+    "phase_C_premiere_specialisation": {
+      "semaines": [9, 10, 11, 12],
+      "increment_reps": [0, 1, 1, 0],
+      "increment_duree_sec": [0, 5, 5, 0],
+      "increment_distance_m": [0, 5, 5, 0],
+      "increment_cardio_min": [0, 2, 2, 0],
+      "note": "Semaine 12 : aucun incrément, c'est la semaine de mini-enchaînement — on ne cherche pas la performance, on consolide la confiance."
+    }
+  },
+
+  "pool_jours": [
+    {
+      "id": "fondamentaux",
+      "nom": "Fondamentaux du mouvement",
+      "type": "muscu",
+      "duree_estimee_min": 40,
+      "note": "Full body au poids du corps. Si la technique se dégrade, on arrête la série même avant la fin prévue.",
+      "blocs_semaine_1": [
+        { "exercise_slug": "air-squat", "ordre": 1, "series": 3, "reps_cible": "10", "notes": "Descends jusqu'où c'est confortable", "repos_sec": 90 },
+        { "exercise_slug": "push-up", "ordre": 2, "series": 3, "reps_cible": "8", "notes": "Sur les genoux si besoin", "repos_sec": 90 },
+        { "exercise_slug": "inverted-row", "ordre": 3, "series": 3, "reps_cible": "8", "repos_sec": 90 },
+        { "exercise_slug": "hip-thrust", "ordre": 4, "series": 3, "reps_cible": "12", "notes": "Au poids du corps pour commencer", "repos_sec": 75 },
+        { "exercise_slug": "plank", "ordre": 5, "series": 3, "reps_cible": "20 sec", "repos_sec": 60 }
+      ]
+    },
+    {
+      "id": "cardio_fondation",
+      "nom": "Cardio fondation",
+      "type": "cardio",
+      "duree_estimee_min": 30,
+      "note": "Tu dois pouvoir tenir une conversation pendant l'effort. Si tu es trop essoufflé pour parler, ralentis.",
+      "blocs_semaine_1": [
+        { "ordre": 1, "cardio_type": "marche_inclinee", "duree_sec": 1200, "notes": "20 min, inclinaison légère, rythme confortable" },
+        { "exercise_slug": "farmers-carry", "ordre": 2, "series": 3, "reps_cible": "30m", "notes": "Charge légère, dos droit", "repos_sec": 90 }
+      ]
+    },
+    {
+      "id": "full_body_renfort",
+      "nom": "Full body & renfort",
+      "type": "muscu",
+      "duree_estimee_min": 40,
+      "note": "Variante du jour fondamentaux avec un mouvement de hanche en plus.",
+      "blocs_semaine_1": [
+        { "exercise_slug": "air-squat", "ordre": 1, "series": 3, "reps_cible": "10", "repos_sec": 90 },
+        { "exercise_slug": "romanian-deadlift", "ordre": 2, "series": 3, "reps_cible": "8", "notes": "Très léger, focus technique de charnière de hanche", "repos_sec": 90 },
+        { "exercise_slug": "push-up", "ordre": 3, "series": 3, "reps_cible": "8", "repos_sec": 90 },
+        { "exercise_slug": "inverted-row", "ordre": 4, "series": 3, "reps_cible": "8", "repos_sec": 90 },
+        { "exercise_slug": "hanging-leg-raise", "ordre": 5, "series": 3, "reps_cible": "8", "notes": "Genoux pliés autorisés", "repos_sec": 60 }
+      ]
+    },
+    {
+      "id": "fonctionnel_leger",
+      "nom": "Fonctionnel léger",
+      "type": "hybride",
+      "duree_estimee_min": 35,
+      "note": "N'apparaît qu'à partir de la phase B (semaine 5). Avant, ce jour est remplacé par un jour fondamentaux supplémentaire.",
+      "blocs_semaine_1": [
+        { "exercise_slug": "kettlebell-swing", "ordre": 1, "series": 3, "reps_cible": "10", "notes": "Charge très légère, focus hanche", "rpe": 5, "repos_sec": 75 },
+        { "exercise_slug": "goblet-squat", "ordre": 2, "series": 3, "reps_cible": "10", "rpe": 5, "repos_sec": 75 },
+        { "exercise_slug": "plank", "ordre": 3, "series": 3, "reps_cible": "25 sec", "repos_sec": 60 }
+      ]
+    },
+    {
+      "id": "endurance_douce",
+      "nom": "Endurance douce",
+      "type": "cardio",
+      "duree_estimee_min": 30,
+      "note": "Version plus longue du cardio fondation, sans portage associé.",
+      "blocs_semaine_1": [
+        { "ordre": 1, "cardio_type": "marche_inclinee", "duree_sec": 1500, "notes": "25 min, rythme confortable" }
+      ]
+    },
+    {
+      "id": "mobilite_core",
+      "nom": "Mobilité & core",
+      "type": "muscu",
+      "duree_estimee_min": 25,
+      "note": "Séance courte, utile en 6ᵉ jour pour renforcer sans fatigue excessive.",
+      "blocs_semaine_1": [
+        { "exercise_slug": "plank", "ordre": 1, "series": 3, "reps_cible": "25 sec", "repos_sec": 60 },
+        { "exercise_slug": "hanging-leg-raise", "ordre": 2, "series": 3, "reps_cible": "8", "notes": "Genoux pliés autorisés", "repos_sec": 60 },
+        { "exercise_slug": "standing-calf-raise", "ordre": 3, "series": 3, "reps_cible": "15", "repos_sec": 45 }
+      ]
+    }
+  ],
+
+  "objectif_modifiers": {
+    "hyrox": {
+      "ordre": ["fondamentaux", "cardio_fondation", "full_body_renfort", "fonctionnel_leger", "endurance_douce", "mobilite_core"],
+      "ratio_muscu_cardio": 50,
+      "note_coaching": "On construit les bases avant d'introduire les vraies stations Hyrox en phase C."
+    },
+    "recomposition": {
+      "ordre": ["fondamentaux", "full_body_renfort", "mobilite_core", "cardio_fondation", "fonctionnel_leger", "endurance_douce"],
+      "ratio_muscu_cardio": 65,
+      "note_coaching": "Priorité à la régularité en musculation — c'est elle qui construit la silhouette recherchée."
+    },
+    "performance": {
+      "ordre": ["fondamentaux", "full_body_renfort", "mobilite_core", "fonctionnel_leger", "cardio_fondation", "endurance_douce"],
+      "ratio_muscu_cardio": 70,
+      "note_coaching": "On pose les bases de force avant de charger davantage au cycle suivant."
+    },
+    "marathon_muscu": {
+      "ordre": ["cardio_fondation", "endurance_douce", "fondamentaux", "full_body_renfort", "fonctionnel_leger", "mobilite_core"],
+      "ratio_muscu_cardio": 30,
+      "note_coaching": "Priorité à l'endurance dès le début — la musculation prévient les blessures de course."
+    }
+  }
+}
