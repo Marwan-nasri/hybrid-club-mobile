@@ -52,20 +52,30 @@ export async function enregistrerProgramme(programme: GeneratedProgram): Promise
 }
 
 /**
+ * Le profil d'onboarding est absent ou partiel : rien à insérer, et réessayer
+ * n'y changera rien. L'appelant doit renvoyer l'utilisateur au quiz.
+ */
+export class ProfilIncompletError extends Error {
+  constructor() {
+    super('Profil d’onboarding incomplet : impossible de régénérer le programme.');
+    this.name = 'ProfilIncompletError';
+  }
+}
+
+/**
  * Reprend le profil laissé par l'onboarding, régénère le programme et l'insère.
  * C'est le point d'entrée de l'écran qui suit la création de compte.
  *
  * Le programme régénéré ici est identique à celui montré en A6 : même profil,
  * générateur déterministe. Voir profilOnboarding.ts.
  *
- * @throws si le profil est incomplet ou absent — l'appelant doit alors renvoyer
- *   l'utilisateur au quiz plutôt que de le laisser sans programme.
+ * @throws {ProfilIncompletError} si le profil est absent ou partiel.
+ * @throws l'erreur Supabase si l'insertion échoue — le profil n'est PAS effacé,
+ *   un simple nouvel appel suffit à réessayer.
  */
 export async function enregistrerProgrammeEnAttente(): Promise<string> {
   const profil = await lireProfil();
-  if (!estComplet(profil)) {
-    throw new Error('Profil d’onboarding incomplet : impossible de régénérer le programme.');
-  }
+  if (!estComplet(profil)) throw new ProfilIncompletError();
 
   const programId = await enregistrerProgramme(genererProgramme(profil));
   await effacerProfil();

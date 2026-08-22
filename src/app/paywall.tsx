@@ -139,7 +139,9 @@ export default function PaywallScreen() {
         <SafeAreaView edges={['bottom']}>
           <Button
             label={annuel ? "Commencer l'essai de 7 jours" : "S'abonner — 14,99 €/mois"}
-            onPress={() => {}}
+            // TODO: passer par RevenueCat ici. En attendant, l'achat est
+            // considéré comme validé et on enchaîne sur la création de compte.
+            onPress={() => router.replace('/creer-compte')}
           />
           <Text className="mt-3 text-center text-xs text-text-tertiary">
             {annuel ? "Aucun prélèvement aujourd'hui" : 'Prélèvement immédiat'}
