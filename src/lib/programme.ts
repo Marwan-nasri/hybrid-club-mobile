@@ -1,10 +1,10 @@
-import { EXERCISES, SUBSTITUTIONS } from './catalogue';
+import { EXERCISES, NOM_EXERCICE, SUBSTITUTIONS } from './catalogue';
 import { generateProgram } from './programGenerator';
 import { effacerProfil, estComplet, lireProfil } from './profilOnboarding';
 import { supabase } from './supabase';
 import { TEMPLATES } from './templates';
 
-import type { GeneratedProgram, GeneratorProfile } from './programGenerator';
+import type { GeneratedProgram, GeneratedSession, GeneratorProfile } from './programGenerator';
 
 /**
  * Génère le programme d'un profil à partir des données embarquées.
@@ -18,6 +18,47 @@ export function genererProgramme(profile: GeneratorProfile): GeneratedProgram {
     exercises: EXERCISES,
     substitutions: SUBSTITUTIONS,
   });
+}
+
+/**
+ * Ce que les limitations déclarées changent concrètement, en paires
+ * « exercice d'origine → substitut ». Alimente l'aperçu de l'écran A4.
+ *
+ * On ne rejoue pas la logique de substitution — elle est interne au moteur et
+ * la dupliquer la ferait diverger au premier changement. On génère deux fois,
+ * avec et sans limitations, et on compare bloc à bloc : le moteur étant
+ * déterministe, tout écart vient forcément des limitations.
+ *
+ * ponytail: deux générations complètes (12 semaines) pour n'exploiter que la
+ * semaine 1. Si ça se voit à la frappe, donner une borne de semaines à
+ * generateProgram plutôt que d'optimiser ici.
+ */
+export function apercuSubstitutions(
+  profile: GeneratorProfile,
+): { avant: string; apres: string }[] {
+  if (profile.limitations.length === 0) return [];
+
+  const cle = (s: GeneratedSession, ordre: number) => `${s.jour}-${ordre}`;
+  const semaine1 = (p: GeneratedProgram) => p.sessions.filter((s) => s.semaine === 1);
+
+  const origine = new Map<string, string>();
+  for (const s of semaine1(genererProgramme({ ...profile, limitations: [] }))) {
+    for (const b of s.blocks) if (b.exercise_slug) origine.set(cle(s, b.ordre), b.exercise_slug);
+  }
+
+  // Map plutôt que tableau : le même remplacement revient sur plusieurs séances.
+  const paires = new Map<string, string>();
+  for (const s of semaine1(genererProgramme(profile))) {
+    for (const b of s.blocks) {
+      const avant = origine.get(cle(s, b.ordre));
+      if (avant && b.exercise_slug && avant !== b.exercise_slug) paires.set(avant, b.exercise_slug);
+    }
+  }
+
+  return [...paires].map(([avant, apres]) => ({
+    avant: NOM_EXERCICE.get(avant) ?? avant,
+    apres: NOM_EXERCICE.get(apres) ?? apres,
+  }));
 }
 
 /**

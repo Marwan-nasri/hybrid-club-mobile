@@ -53,6 +53,11 @@ export default function ComposantsScreen() {
           <Section title="Écrans">
             <View className="gap-3">
               <Button
+                label="A1 — Accroche (début du quiz)"
+                variant="secondary"
+                onPress={() => router.push('/accroche')}
+              />
+              <Button
                 label="A6 — Reveal du plan"
                 variant="secondary"
                 onPress={() => router.push('/reveal')}

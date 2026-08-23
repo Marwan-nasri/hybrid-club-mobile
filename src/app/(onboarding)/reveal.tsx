@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,22 +9,9 @@ import { Card } from '@/components/ui/Card';
 import { StatBlock } from '@/components/ui/StatBlock';
 import { NOM_EXERCICE } from '@/lib/catalogue';
 import { genererProgramme } from '@/lib/programme';
-import { majProfil } from '@/lib/profilOnboarding';
+import { estComplet, lireProfil } from '@/lib/profilOnboarding';
 
 import type { BodyZone, GeneratedSession, GeneratorProfile } from '@/lib/programGenerator';
-
-// TODO: à remplacer par l'état du quiz d'onboarding quand les 10 écrans existeront.
-// En attendant, le profil de la maquette A6 : Hyrox, 5 jours, épaule sensible.
-const PROFIL_DEMO: GeneratorProfile = {
-  objectif: 'hyrox',
-  niveau: 'intermediaire',
-  jours_dispo: 5,
-  equipement: 'salle_complete',
-  limitations: ['epaule'],
-  squat_1rm: 140,
-  bench_1rm: 100,
-  deadlift_1rm: 180,
-};
 
 const JOURS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 
@@ -99,14 +86,18 @@ function description(profile: GeneratorProfile): string {
 }
 
 export default function RevealScreen() {
-  const programme = genererProgramme(PROFIL_DEMO);
+  const [profil, setProfil] = useState<GeneratorProfile | null>(null);
 
-  // Le quiz écrira le profil réponse par réponse ; en attendant, le reveal pose
-  // PROFIL_DEMO pour que l'insertion post-authentification ait de quoi
-  // régénérer. À retirer quand les 10 écrans du quiz existeront.
+  // Le quiz est la seule source du profil : le reveal le lit, ne l'écrit jamais.
+  // Y arriver sans profil complet n'est pas un cas d'erreur — c'est un quiz
+  // jamais fait, ou abandonné en route.
   useEffect(() => {
-    majProfil(PROFIL_DEMO);
+    lireProfil().then((p) => (estComplet(p) ? setProfil(p) : router.replace('/accroche')));
   }, []);
+
+  if (!profil) return <View className="flex-1 bg-background" />;
+
+  const programme = genererProgramme(profil);
 
   if (__DEV__ && programme.warnings.length > 0) {
     console.warn(
@@ -132,7 +123,7 @@ export default function RevealScreen() {
             Ton plan est prêt
           </Text>
           <Text className="mt-2 text-3xl font-bold text-text-primary">{programme.program.nom}</Text>
-          <Text className="mt-3 text-xl text-text-secondary">{description(PROFIL_DEMO)}</Text>
+          <Text className="mt-3 text-xl text-text-secondary">{description(profil)}</Text>
 
           <View className="mt-6 flex-row gap-3">
             <View className="flex-1">

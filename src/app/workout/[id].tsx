@@ -29,8 +29,8 @@ const EXERCICES: Exercice[] = [
     repos: '2:30',
     derniereFois: '4×6 @ 92,5 kg',
     series: [
-      { weight: '95', reps: '6', validated: true },
-      { weight: '95', reps: '6', validated: true },
+      { weight: '95', reps: '6', validated: false },
+      { weight: '95', reps: '6', validated: false },
       { weight: '95', reps: '6', validated: false },
       { weight: '92,5', reps: '6', validated: false },
     ],
@@ -78,7 +78,7 @@ export default function WorkoutScreen() {
   // Les séries de tous les exercices, pour ne rien perdre en naviguant.
   const [seriesParExercice, setSeriesParExercice] = useState(EXERCICES.map((e) => e.series));
   const [indexExercice, setIndexExercice] = useState(0);
-  const [chrono, setChrono] = useState(28 * 60 + 54);
+  const [chrono, setChrono] = useState(0);
 
   useEffect(() => {
     const id = setInterval(() => setChrono((s) => s + 1), 1000);

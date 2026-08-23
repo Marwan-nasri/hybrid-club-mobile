@@ -23,9 +23,28 @@ import type { GeneratorProfile } from './programGenerator';
 
 const CLE = 'onboarding.profil';
 
-export type ProfilPartiel = Partial<GeneratorProfile>;
+/**
+ * Ce que le quiz collecte : les champs dont le moteur a besoin, plus ceux qui
+ * ne servent qu'à `profiles` (personnalisation, suivi). Le moteur n'en voit
+ * jamais que le sous-ensemble `GeneratorProfile`.
+ */
+export type ProfilOnboarding = GeneratorProfile & {
+  /** En secondes. Demandé seulement si l'objectif est hyrox ou marathon_muscu. */
+  temps_5k_sec: number | null;
+  prenom: string | null;
+  poids_kg: number | null;
+  taille_cm: number | null;
+  /** ISO `YYYY-MM-DD`, comme la colonne `profiles.date_naissance`. */
+  date_naissance: string | null;
+};
 
-/** Toutes les clés que le moteur exige — `squat_1rm: null` compte comme répondu. */
+export type ProfilPartiel = Partial<ProfilOnboarding>;
+
+/**
+ * Les seules clés qui bloquent la génération — `squat_1rm: null` compte comme
+ * répondu. Les champs optionnels du quiz n'entrent pas ici : leur absence
+ * n'empêche rien.
+ */
 const CHAMPS_REQUIS: (keyof GeneratorProfile)[] = [
   'objectif',
   'niveau',

@@ -148,14 +148,42 @@ Le catalogue d'exercices est **embarqué dans l'app**, pas lu en base : le revea
   genou 6). Nécessite d'élargir le catalogue, pas seulement d'ajouter des 
   lignes — certains manques sont structurels (aucun squat sans genou hors 
   leg-press). À traiter comme un chantier dédié.
+  Deux lignes fausses repérées via l'aperçu A4, même famille que le cas 002 :
+  - `romanian-deadlift → back-extension`, en priorité 1 pour `limitation_dos_bas`
+    *et* `limitation_hanche` : le substitut charge directement la zone à ménager.
+  - `lat-pulldown → lateral-raise` (`limitation_coude`, priorité 2) : change de
+    pattern (tirage vertical → isolation épaule). La priorité 1
+    (`straight-arm-pulldown`) est bonne — c'est le repli qui dérape, et il sort
+    dès que la priorité 1 est déjà prise ailleurs dans la séance.
+- Écriture du réalisé : `workout/[id].tsx` tourne encore sur des données
+  mockées, rien ne va vers `workout_logs` / `set_logs` / `cardio_logs`.
+  À traiter en même temps, parce que la vraie règle vient de là :
+  - La pré-saisie des charges est fausse. Le mock affiche 95 / 95 / 95 / 92,5
+    alors que « Dernière fois » annonce 4×6 @ 92,5 kg. La règle du présent
+    fichier est « charge de la séance précédente pré-remplie en gris » : les
+    quatre lignes doivent venir du dernier `set_logs` de l'exercice, pas d'une
+    valeur écrite à la main. Ne pas corriger avant le branchement — ce serait
+    remplacer une valeur arbitraire par une autre.
+
+- Tagger des exercices en `home_gym` : aucun exercice du catalogue n'utilise ce
+  niveau d'équipement, et tous les mouvements à la barre (back-squat, deadlift,
+  bench-press, overhead-press, barbell-row) demandent `salle_complete`. Un
+  profil `home_gym` perd donc tout le travail à la barre. L'option est retirée
+  du quiz (`quiz/equipement.tsx`) en attendant, mais l'enum la garde.
 - Migration 002 : la ligne seated-calf-raise → plank est mal pensée 
   (substitution qui change la nature du mouvement). À corriger.
-- Insertion Supabase : `creer_programme` (migration 006, RPC atomique) et
-  `enregistrerProgrammeEnAttente()` existent, mais aucun écran ne les appelle —
-  l'écran post-création de compte n'existe pas encore. Vérifiée de bout en bout
-  le 2026-08-22 sur le projet de dev (60 séances / 276 blocs). Test manuel :
+- Insertion Supabase : `creer_programme` (migration 006, RPC atomique) est
+  branchée — `creer-compte.tsx` appelle `enregistrerProgrammeEnAttente()`
+  depuis le commit 3d98533. Vérifiée le 2026-08-22 sur le projet de dev
+  (60 séances / 276 blocs), mais avec le profil de démo : reste à la repasser
+  sur un profil venu du vrai quiz, une fois les 8 écrans posés. Test manuel :
   `npm run test:insertion` (voir en-tête du script pour les variables).
-- PROFIL_DEMO codé en dur dans reveal.tsx, à remplacer par l'état du quiz.
+- ESLint : `expo lint` installe eslint + eslint-config-expo (2 devDependencies +
+  réécriture du lockfile) et génère `eslint.config.js`. Décidé de le garder,
+  mais après le quiz — pas pendant.
+- Lien « J'ai déjà un compte » de la maquette A1 : absent d'`accroche.tsx`. Il
+  n'y a pas d'écran de connexion, et `creer-compte.tsx` est un signup
+  post-achat. À poser avec l'écran de connexion.
 
 ## État d'avancement
 
