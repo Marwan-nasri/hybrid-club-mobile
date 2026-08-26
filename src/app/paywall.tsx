@@ -1,10 +1,11 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { acheter, chargerOffres, restaurer, type Offres } from '@/lib/purchases';
 
 type Offre = 'annuel' | 'mensuel';
 
@@ -41,7 +42,55 @@ function LienDiscret({ label, onPress }: { label: string; onPress: () => void })
 
 export default function PaywallScreen() {
   const [offre, setOffre] = useState<Offre>('annuel');
+  const [offres, setOffres] = useState<Offres>({ annuel: null, mensuel: null });
+  const [enCours, setEnCours] = useState(false);
+  const [erreur, setErreur] = useState<string | null>(null);
   const annuel = offre === 'annuel';
+  const paquet = annuel ? offres.annuel : offres.mensuel;
+
+  // Offering absent tant que le compte Apple n'est pas validé. On n'affiche
+  // rien : les prix de la maquette servent de repli, ils seront remplacés par
+  // ceux de l'App Store dès que les produits existeront.
+  useEffect(() => {
+    chargerOffres().then(setOffres).catch(() => {});
+  }, []);
+
+  const valider = async () => {
+    if (!paquet) {
+      // TODO: supprimer avec l'arrivée des vrais produits. En attendant, cette
+      // sortie garde le tunnel quiz → reveal → paywall → compte testable en
+      // dev. `__DEV__` est faux en build de release : rien ne fuit en prod.
+      if (__DEV__) {
+        router.replace('/creer-compte');
+        return;
+      }
+      setErreur("Les offres ne sont pas disponibles pour le moment. Réessaie dans un instant.");
+      return;
+    }
+
+    setEnCours(true);
+    setErreur(null);
+    try {
+      if (await acheter(paquet)) router.replace('/creer-compte');
+    } catch (e) {
+      setErreur(e instanceof Error ? e.message : "L'achat n'a pas abouti.");
+    } finally {
+      setEnCours(false);
+    }
+  };
+
+  const restaurerAchats = async () => {
+    setEnCours(true);
+    setErreur(null);
+    try {
+      if (await restaurer()) router.replace('/creer-compte');
+      else setErreur('Aucun abonnement actif sur ce compte Apple.');
+    } catch (e) {
+      setErreur(e instanceof Error ? e.message : 'La restauration a échoué.');
+    } finally {
+      setEnCours(false);
+    }
+  };
 
   return (
     <View className="flex-1 bg-background">
@@ -92,10 +141,10 @@ export default function PaywallScreen() {
                 <Text
                   className="text-3xl font-bold text-text-primary"
                   style={{ fontVariant: ['tabular-nums'] }}>
-                  89,99 €
+                  {offres.annuel?.product.priceString ?? '89,99 €'}
                 </Text>
                 <Text className="ml-2 text-base text-text-secondary">
-                  / an — soit 7,50 €/mois
+                  / an — soit {offres.annuel?.product.pricePerMonthString ?? '7,50 €'}/mois
                 </Text>
               </View>
               <Text className="mt-2 text-sm font-semibold text-accent">
@@ -121,7 +170,7 @@ export default function PaywallScreen() {
                 <Text
                   className="text-xl text-text-secondary"
                   style={{ fontVariant: ['tabular-nums'] }}>
-                  14,99 € / mois
+                  {offres.mensuel?.product.priceString ?? '14,99 €'} / mois
                 </Text>
               </View>
             </Card>
@@ -137,17 +186,29 @@ export default function PaywallScreen() {
 
       <View className="absolute inset-x-0 bottom-0 bg-background px-5 pt-3">
         <SafeAreaView edges={['bottom']}>
+          {/* Le design system n'a pas de couleur d'erreur : `text-warning` est
+              réservé aux contre-indications. Même surface encadrée qu'en A8. */}
+          {erreur ? (
+            <View className="mb-3 rounded-card border border-border bg-surface p-4">
+              <Text className="text-base text-text-primary">{erreur}</Text>
+            </View>
+          ) : null}
           <Button
-            label={annuel ? "Commencer l'essai de 7 jours" : "S'abonner — 14,99 €/mois"}
-            // TODO: passer par RevenueCat ici. En attendant, l'achat est
-            // considéré comme validé et on enchaîne sur la création de compte.
-            onPress={() => router.replace('/creer-compte')}
+            label={
+              enCours
+                ? 'Un instant…'
+                : annuel
+                  ? "Commencer l'essai de 7 jours"
+                  : `S'abonner — ${offres.mensuel?.product.priceString ?? '14,99 €'}/mois`
+            }
+            disabled={enCours}
+            onPress={valider}
           />
           <Text className="mt-3 text-center text-xs text-text-tertiary">
             {annuel ? "Aucun prélèvement aujourd'hui" : 'Prélèvement immédiat'}
           </Text>
           <View className="mt-1 flex-row justify-center">
-            <LienDiscret label="Restaurer les achats" onPress={() => {}} />
+            <LienDiscret label="Restaurer les achats" onPress={restaurerAchats} />
             <LienDiscret label="CGU" onPress={() => {}} />
             <LienDiscret label="Confidentialité" onPress={() => {}} />
           </View>

@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { enregistrerProgrammeEnAttente, ProfilIncompletError } from '@/lib/programme';
+import { lierCompte } from '@/lib/purchases';
 import { supabase } from '@/lib/supabase';
 
 /**
@@ -92,6 +93,14 @@ export default function CreerCompteScreen() {
     setEtat('chargement');
     setErreur(null);
     try {
+      // L'achat a été fait sous un identifiant RevenueCat anonyme, avant que le
+      // compte existe. On le rattache ici, sinon l'abonnement reste collé à
+      // l'appareil. Un échec ne doit pas bloquer : le programme compte plus, et
+      // il n'y a rien à afficher d'utile ici. Le rattachement se rejouera avec
+      // l'écran de connexion, quand il existera.
+      const { data: utilisateur } = await supabase.auth.getUser();
+      if (utilisateur.user) await lierCompte(utilisateur.user.id).catch(() => {});
+
       await enregistrerProgrammeEnAttente();
       router.replace('/(tabs)');
     } catch (e) {
