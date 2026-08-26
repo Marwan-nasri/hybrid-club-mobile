@@ -155,7 +155,23 @@ Le catalogue d'exercices est **embarqué dans l'app**, pas lu en base : le revea
     pattern (tirage vertical → isolation épaule). La priorité 1
     (`straight-arm-pulldown`) est bonne — c'est le repli qui dérape, et il sort
     dès que la priorité 1 est déjà prise ailleurs dans la séance.
-- Écriture du réalisé : `workout/[id].tsx` tourne encore sur des données
+- **Prioritaire — Persistance durable de l'utilisateur.** Deux trous à combler
+  ensemble, ils touchent la même chose : ce qui survit à l'onboarding.
+
+  `profiles` n'est écrit par personne. Ni `creer_programme` (migration 006),
+  ni `creer-compte.tsx`. `effacerProfil()` supprime le profil d'onboarding
+  d'AsyncStorage juste après l'insertion du programme : 1RM, poids, taille,
+  date de naissance et prénom sont alors **définitivement perdus**, alors que
+  le schéma prévoit des colonnes pour eux. Le commentaire de
+  `profilOnboarding.ts` affirmait le contraire — corrigé le 2026-08-27, il dit
+  maintenant ce qui se passe réellement.
+  Conséquence déjà visible : l'onglet Aujourd'hui ne peut pas afficher la
+  charge en kg de la maquette B1 (`4×6 · 95 kg`), parce que `session_blocks`
+  ne stocke que `pct_1rm` et qu'il n'y a plus de 1RM avec quoi la multiplier.
+  À faire : écrire `profiles` dans `enregistrerProgrammeEnAttente()`, avant
+  l'appel à `effacerProfil()`.
+
+  Écriture du réalisé : `workout/[id].tsx` tourne encore sur des données
   mockées, rien ne va vers `workout_logs` / `set_logs` / `cardio_logs`.
   À traiter en même temps, parce que la vraie règle vient de là :
   - La pré-saisie des charges est fausse. Le mock affiche 95 / 95 / 95 / 92,5
