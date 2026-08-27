@@ -312,6 +312,25 @@ function phasePourSemaine(
   throw new Error(`Aucune phase de progression ne couvre la semaine ${semaine}.`);
 }
 
+/**
+ * La périodisation d'un niveau, en tranches de semaines.
+ *
+ * Sortie de `generateProgram` parce qu'elle ne dépend que du template : les
+ * écrans qui lisent un programme déjà inséré (onglet Programme) n'ont plus le
+ * profil d'onboarding sous la main, mais `programs.niveau` suffit à retrouver
+ * la phase d'une semaine. Une seule source, pas deux calculs à faire diverger.
+ */
+export function phasesDuTemplate(template: LevelTemplate): ProgramPhase[] {
+  return Object.entries(template.progression)
+    .filter((e): e is [string, ProgressionPhase] => isPhase(e[1]))
+    .map(([cle, p]) => ({
+      label: libellePhase(cle),
+      de: Math.min(...p.semaines),
+      a: Math.max(...p.semaines),
+    }))
+    .sort((a, b) => a.de - b.de);
+}
+
 type RepsKind = 'reps' | 'duree_sec' | 'distance_m';
 
 /**
@@ -782,14 +801,7 @@ export function generateProgram(input: GeneratorInput): GeneratedProgram {
     });
   }
 
-  const phases: ProgramPhase[] = Object.entries(template.progression)
-    .filter((e): e is [string, ProgressionPhase] => isPhase(e[1]))
-    .map(([cle, p]) => ({
-      label: libellePhase(cle),
-      de: Math.min(...p.semaines),
-      a: Math.max(...p.semaines),
-    }))
-    .sort((a, b) => a.de - b.de);
+  const phases = phasesDuTemplate(template);
 
   // Un exercice présent dans plusieurs jours produit le même avertissement
   // autant de fois : on ne garde qu'une occurrence de chaque message.

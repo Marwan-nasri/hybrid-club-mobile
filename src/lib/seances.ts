@@ -1,7 +1,7 @@
 import { semaineEtJour } from './calendrier';
 import { supabase } from './supabase';
 
-import type { CardioType, Intervalles, SessionType } from './programGenerator';
+import type { CardioType, Intervalles, LevelType, SessionType } from './programGenerator';
 
 const LIBELLE_CARDIO: Record<CardioType, string> = {
   course: 'Course',
@@ -131,4 +131,137 @@ export async function chargerSemaine(aujourdhui: Date): Promise<EtatSemaine> {
         .filter((b): b is Bloc => b.nom !== null),
     })),
   };
+}
+
+// ── Onglet Programme (B2) ────────────────────────────────────────────────────
+
+/**
+ * Le statut réel d'une séance, lu dans `workout_logs`.
+ *
+ * Contrairement à l'onglet Aujourd'hui — écrit quand `workout_logs` n'était
+ * alimenté par personne — la complétion est ici une vraie donnée : l'écran de
+ * séance écrit `statut = 'termine'` à la clôture.
+ */
+export type StatutSeance = 'termine' | 'en_cours' | 'a_venir';
+
+/** Un des 7 jours de la semaine affichée. `session` à `null` = repos. */
+export type JourProgramme = {
+  jour: number;
+  session: { id: string; nom: string; type: SessionType; duree_estimee_min: number | null } | null;
+  statut: StatutSeance | null;
+};
+
+export type BlocProgramme = {
+  id: string;
+  nom: string;
+  niveau: LevelType;
+  duree_semaines: number;
+  /** Semaine courante, bornée au bloc : avant le début → 1, après la fin → la dernière. */
+  semaine_courante: number;
+  /** Hors des 12 semaines — l'écran le signale plutôt que de mentir sur la semaine. */
+  hors_bloc: boolean;
+  jour: number;
+  total_seances: number;
+  seances_terminees: number;
+};
+
+export type EtatBloc = { statut: 'sans_programme' } | { statut: 'ok'; bloc: BlocProgramme };
+
+/**
+ * L'en-tête de l'onglet Programme : le bloc actif et sa progression réelle.
+ *
+ * `seances_terminees` compte les `workout_logs` à `termine` rattachés à ce
+ * programme, via la jointure interne sur `sessions` — un log d'un bloc archivé
+ * ne doit pas gonfler la progression du bloc courant.
+ */
+export async function chargerBloc(aujourdhui: Date): Promise<EtatBloc> {
+  const { data: programme, error } = await supabase
+    .from('programs')
+    .select('id, nom, niveau, date_debut, duree_semaines')
+    .eq('is_active', true)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!programme) return { statut: 'sans_programme' };
+
+  const [total, terminees] = await Promise.all([
+    supabase
+      .from('sessions')
+      .select('id', { count: 'exact', head: true })
+      .eq('program_id', programme.id),
+    supabase
+      .from('workout_logs')
+      .select('id, sessions!inner(program_id)', { count: 'exact', head: true })
+      .eq('statut', 'termine')
+      .eq('sessions.program_id', programme.id),
+  ]);
+
+  if (total.error) throw total.error;
+  if (terminees.error) throw terminees.error;
+
+  const { semaine, jour } = semaineEtJour(programme.date_debut, aujourdhui);
+  const horsBloc = semaine < 1 || semaine > programme.duree_semaines;
+
+  return {
+    statut: 'ok',
+    bloc: {
+      id: programme.id,
+      nom: programme.nom,
+      niveau: programme.niveau,
+      duree_semaines: programme.duree_semaines,
+      semaine_courante: Math.min(Math.max(semaine, 1), programme.duree_semaines),
+      hors_bloc: horsBloc,
+      jour,
+      total_seances: total.count ?? 0,
+      seances_terminees: terminees.count ?? 0,
+    },
+  };
+}
+
+type LigneJour = {
+  id: string;
+  jour: number;
+  type: SessionType;
+  nom: string;
+  duree_estimee_min: number | null;
+  workout_logs: { statut: string | null }[];
+};
+
+/**
+ * Les 7 jours d'une semaine du bloc, statut compris.
+ *
+ * Les `workout_logs` sont embarqués plutôt que demandés à part : chaque semaine
+ * a ses propres lignes `sessions` (contrainte unique program_id/semaine/jour),
+ * donc un log pointe une semaine précise et la jointure suffit.
+ */
+export async function chargerSemaineBloc(
+  programId: string,
+  semaine: number,
+): Promise<JourProgramme[]> {
+  const { data, error } = await supabase
+    .from('sessions')
+    .select('id, jour, type, nom, duree_estimee_min, workout_logs(statut)')
+    .eq('program_id', programId)
+    .eq('semaine', semaine)
+    .order('jour')
+    .returns<LigneJour[]>();
+
+  if (error) throw error;
+
+  const parJour = new Map((data ?? []).map((s) => [s.jour, s]));
+
+  return Array.from({ length: 7 }, (_, i) => {
+    const s = parJour.get(i + 1);
+    if (!s) return { jour: i + 1, session: null, statut: null };
+
+    const statuts = s.workout_logs.map((l) => l.statut);
+    return {
+      jour: i + 1,
+      session: { id: s.id, nom: s.nom, type: s.type, duree_estimee_min: s.duree_estimee_min },
+      statut:
+        statuts.includes('termine') ? 'termine'
+        : statuts.includes('en_cours') ? 'en_cours'
+        : 'a_venir',
+    };
+  });
 }

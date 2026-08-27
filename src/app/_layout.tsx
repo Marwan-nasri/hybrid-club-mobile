@@ -25,6 +25,7 @@ export default function RootLayout() {
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="workout/[id]" />
+        <Stack.Screen name="programme/[id]" />
         <Stack.Screen name="(onboarding)/reveal" />
         <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
         <Stack.Screen name="(auth)/creer-compte" options={{ gestureEnabled: false }} />

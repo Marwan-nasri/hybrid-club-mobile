@@ -20,6 +20,11 @@ export default function AppTabs() {
         />
       </NativeTabs.Trigger>
 
+      <NativeTabs.Trigger name="programme">
+        <NativeTabs.Trigger.Label>Programme</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf="calendar" />
+      </NativeTabs.Trigger>
+
       <NativeTabs.Trigger name="explore">
         <NativeTabs.Trigger.Label>Composants</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon

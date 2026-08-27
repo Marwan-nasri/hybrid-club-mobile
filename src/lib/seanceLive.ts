@@ -60,6 +60,7 @@ export type SeanceLive = {
   id: string;
   nom: string;
   type: SessionType;
+  duree_estimee_min: number | null;
   note_coaching: string | null;
   blocs: Bloc[];
 };
@@ -83,6 +84,7 @@ type LigneSeance = {
   id: string;
   nom: string;
   type: SessionType;
+  duree_estimee_min: number | null;
   note_coaching: string | null;
   session_blocks: LigneBloc[];
 };
@@ -155,7 +157,7 @@ export async function chargerSeance(sessionId: string): Promise<SeanceLive> {
   const { data, error } = await supabase
     .from('sessions')
     .select(
-      'id, nom, type, note_coaching, ' +
+      'id, nom, type, duree_estimee_min, note_coaching, ' +
         'session_blocks(ordre, series, reps_cible, rpe, repos_sec, cardio_type, ' +
         'distance_m, duree_sec, intervalles, notes, exercise_id, exercises(nom))',
     )
@@ -174,6 +176,7 @@ export async function chargerSeance(sessionId: string): Promise<SeanceLive> {
     id: data.id,
     nom: data.nom,
     type: data.type,
+    duree_estimee_min: data.duree_estimee_min,
     note_coaching: data.note_coaching,
     blocs: data.session_blocks.map((b): Bloc => {
       if (b.exercise_id && b.exercises) {
@@ -317,4 +320,28 @@ export async function terminerSeance(workoutLogId: string, dureeSec: number): Pr
 
   if (error) throw error;
   return volume;
+}
+
+/**
+ * Le statut réel d'une séance, pour un écran qui ne la démarre pas encore.
+ *
+ * Même lecture que `demarrerSeance`, mais sans reprise : le détail de séance
+ * (B3) doit distinguer « déjà faite » de « à venir » avant d'ouvrir quoi que
+ * ce soit dans `workout_logs`.
+ */
+export async function statutSeance(
+  sessionId: string,
+): Promise<'termine' | 'en_cours' | 'a_venir'> {
+  const { data, error } = await supabase
+    .from('workout_logs')
+    .select('statut')
+    .eq('session_id', sessionId)
+    .returns<{ statut: string | null }[]>();
+
+  if (error) throw error;
+
+  const statuts = (data ?? []).map((l) => l.statut);
+  return statuts.includes('termine') ? 'termine'
+    : statuts.includes('en_cours') ? 'en_cours'
+    : 'a_venir';
 }

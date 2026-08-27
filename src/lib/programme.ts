@@ -1,12 +1,18 @@
 import { dateLocaleIso } from './calendrier';
 import { EXERCISES, NOM_EXERCICE, SUBSTITUTIONS } from './catalogue';
-import { generateProgram } from './programGenerator';
+import { generateProgram, phasesDuTemplate } from './programGenerator';
 import { effacerProfil, estComplet, lireProfil } from './profilOnboarding';
 import { supabase } from './supabase';
 import { TEMPLATES } from './templates';
 
 import type { ProfilPartiel } from './profilOnboarding';
-import type { GeneratedProgram, GeneratedSession, GeneratorProfile } from './programGenerator';
+import type {
+  GeneratedProgram,
+  GeneratedSession,
+  GeneratorProfile,
+  LevelType,
+  ProgramPhase,
+} from './programGenerator';
 
 /**
  * Génère le programme d'un profil à partir des données embarquées.
@@ -20,6 +26,19 @@ export function genererProgramme(profile: GeneratorProfile): GeneratedProgram {
     exercises: EXERCISES,
     substitutions: SUBSTITUTIONS,
   });
+}
+
+/**
+ * La périodisation du bloc, depuis le seul niveau — ce que `programs` conserve.
+ * Même source que la structure affichée en A6 (reveal.tsx).
+ */
+export function phasesProgramme(niveau: LevelType): ProgramPhase[] {
+  return phasesDuTemplate(TEMPLATES[niveau]);
+}
+
+/** Le libellé de phase d'une semaine donnée, `null` hors du bloc. */
+export function phaseDeSemaine(niveau: LevelType, semaine: number): string | null {
+  return phasesProgramme(niveau).find((p) => semaine >= p.de && semaine <= p.a)?.label ?? null;
 }
 
 /**
