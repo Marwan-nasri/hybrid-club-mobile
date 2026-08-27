@@ -10,7 +10,7 @@
 
 import assert from 'node:assert/strict';
 
-import { jourIso, semaineEtJour } from '../src/lib/calendrier.ts';
+import { dateLocaleIso, jourIso, semaineEtJour } from '../src/lib/calendrier.ts';
 
 const cas: [string, string, number, number, string][] = [
   // date_debut, jour observé, semaine attendue, jour attendu, ce qu'on teste
@@ -42,4 +42,12 @@ assert.equal(jourIso(new Date(2026, 7, 30)), 7, 'dimanche doit valoir 7, pas 0')
 assert.equal(jourIso(new Date(2026, 7, 24)), 1, 'lundi doit valoir 1');
 console.log('  ok  jourIso : dimanche = 7, lundi = 1');
 
-console.log(`\n${cas.length + 1} vérifications passées.`);
+// `date_debut` part du client parce que `current_date` s'évalue en UTC côté
+// Postgres : à 00 h 30 à Paris, `toISOString()` daterait le programme de la
+// veille. Ces deux cas valent dans n'importe quel fuseau, les dates étant
+// construites en heure locale.
+assert.equal(dateLocaleIso(new Date(2026, 7, 27, 0, 30)), '2026-08-27', 'date locale, pas UTC');
+assert.equal(dateLocaleIso(new Date(2026, 0, 5, 23, 59)), '2026-01-05', 'mois et jour sur 2 chiffres');
+console.log('  ok  dateLocaleIso : date locale, zéros de tête');
+
+console.log(`\n${cas.length + 3} vérifications passées.`);

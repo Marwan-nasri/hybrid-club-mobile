@@ -155,31 +155,28 @@ Le catalogue d'exercices est **embarqué dans l'app**, pas lu en base : le revea
     pattern (tirage vertical → isolation épaule). La priorité 1
     (`straight-arm-pulldown`) est bonne — c'est le repli qui dérape, et il sort
     dès que la priorité 1 est déjà prise ailleurs dans la séance.
-- **Prioritaire — Persistance durable de l'utilisateur.** Deux trous à combler
-  ensemble, ils touchent la même chose : ce qui survit à l'onboarding.
-
-  `profiles` n'est écrit par personne. Ni `creer_programme` (migration 006),
-  ni `creer-compte.tsx`. `effacerProfil()` supprime le profil d'onboarding
-  d'AsyncStorage juste après l'insertion du programme : 1RM, poids, taille,
-  date de naissance et prénom sont alors **définitivement perdus**, alors que
-  le schéma prévoit des colonnes pour eux. Le commentaire de
-  `profilOnboarding.ts` affirmait le contraire — corrigé le 2026-08-27, il dit
-  maintenant ce qui se passe réellement.
-  Conséquence déjà visible : l'onglet Aujourd'hui ne peut pas afficher la
-  charge en kg de la maquette B1 (`4×6 · 95 kg`), parce que `session_blocks`
-  ne stocke que `pct_1rm` et qu'il n'y a plus de 1RM avec quoi la multiplier.
-  À faire : écrire `profiles` dans `enregistrerProgrammeEnAttente()`, avant
-  l'appel à `effacerProfil()`.
-
-  Écriture du réalisé : `workout/[id].tsx` tourne encore sur des données
-  mockées, rien ne va vers `workout_logs` / `set_logs` / `cardio_logs`.
-  À traiter en même temps, parce que la vraie règle vient de là :
-  - La pré-saisie des charges est fausse. Le mock affiche 95 / 95 / 95 / 92,5
-    alors que « Dernière fois » annonce 4×6 @ 92,5 kg. La règle du présent
-    fichier est « charge de la séance précédente pré-remplie en gris » : les
-    quatre lignes doivent venir du dernier `set_logs` de l'exercice, pas d'une
-    valeur écrite à la main. Ne pas corriger avant le branchement — ce serait
-    remplacer une valeur arbitraire par une autre.
+- Réalisé : ce qui reste après la passe du 2026-08-27. `workout/[id].tsx` écrit
+  bien `workout_logs` / `set_logs`, et `creer_programme` remplit `profiles`
+  (migration 007). Restent :
+  - `cardio_logs` n'est écrit par personne. Les blocs cardio d'une séance sont
+    affichés en lecture seule dans l'écran de séance, avec une mention
+    explicite — ni chrono, ni distance, ni allure enregistrés.
+  - `personal_records` : aucune détection de record. Comparaison au meilleur
+    existant + mise à jour, à faire dans une passe dédiée.
+  - `profiles.ratio_muscu_cardio` reste à sa valeur par défaut (50). Le moteur
+    le calcule (`objectif_modifiers`) et `programGenerator.ts:187` demande de
+    le réécrire sur le profil — pas fait, il n'était pas dans le périmètre.
+  - Pas de note de fin de séance ni de ressenti (`workout_logs.note`,
+    `ressenti`), volontairement.
+  - Offline : écriture directe à chaque validation de série, aucune file
+    d'attente. Une coupure réseau en pleine séance perd la série. Le
+    `client_uuid` est posé sur `workout_logs` pour que la déduplication soit
+    possible le jour où la synchro différée arrive — c'est la seule chose de
+    l'offline qui existe aujourd'hui. Contradiction assumée avec la règle
+    « offline-first obligatoire » du présent fichier, à lever avant TestFlight.
+  - `duree_sec` compte depuis l'ouverture de l'écran, pas depuis
+    `workout_logs.date_debut` : une séance reprise après un crash repart de
+    zéro. À recaler sur la colonne quand l'offline sera traité.
 
 - Tagger des exercices en `home_gym` : aucun exercice du catalogue n'utilise ce
   niveau d'équipement, et tous les mouvements à la barre (back-squat, deadlift,

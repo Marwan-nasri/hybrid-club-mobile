@@ -81,15 +81,16 @@ export async function majProfil(reponse: ProfilPartiel): Promise<ProfilPartiel> 
 }
 
 /**
- * Efface le profil d'onboarding après insertion réussie du programme.
+ * Efface le profil d'onboarding, une fois qu'il est en base.
  *
- * Attention : ce que le profil contient est alors **perdu**. `profiles` n'est
- * écrit par personne — ni par `creer_programme` (migration 006), ni par
- * `creer-compte.tsx`. Les 1RM, l'anthropométrie et le prénom ne survivent donc
- * pas à l'onboarding, alors que le schéma prévoit des colonnes pour eux.
+ * Appelé par `enregistrerProgrammeEnAttente()` après l'appel à
+ * `creer_programme`, qui écrit désormais `profiles` (migration 007) à partir
+ * du profil transporté dans le payload. Ce qui vit ici a donc bien un double
+ * durable avant d'être supprimé — ce n'était pas le cas jusqu'au 2026-08-27,
+ * où 1RM, anthropométrie et prénom étaient perdus.
  *
- * À corriger avec l'écriture du réalisé : écrire `profiles` ici, avant le
- * removeItem. Voir « Chantiers ouverts » dans CLAUDE.md.
+ * Ne jamais appeler cette fonction avant que l'insertion ait réussi : le
+ * profil est la seule copie tant que la RPC n'a pas rendu la main.
  */
 export async function effacerProfil(): Promise<void> {
   await AsyncStorage.removeItem(CLE);

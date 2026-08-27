@@ -1,9 +1,11 @@
+import { dateLocaleIso } from './calendrier';
 import { EXERCISES, NOM_EXERCICE, SUBSTITUTIONS } from './catalogue';
 import { generateProgram } from './programGenerator';
 import { effacerProfil, estComplet, lireProfil } from './profilOnboarding';
 import { supabase } from './supabase';
 import { TEMPLATES } from './templates';
 
+import type { ProfilPartiel } from './profilOnboarding';
 import type { GeneratedProgram, GeneratedSession, GeneratorProfile } from './programGenerator';
 
 /**
@@ -62,19 +64,36 @@ export function apercuSubstitutions(
 }
 
 /**
- * Insère le programme généré dans programs / sessions / session_blocks.
+ * Insère le profil et le programme généré dans profiles / programs / sessions /
+ * session_blocks.
  *
- * Tout part en un seul appel RPC (migration 006) : le client Supabase ne sait
- * pas ouvrir de transaction, la fonction plpgsql en est une. L'user_id vient
- * de auth.uid() côté serveur, il n'est donc pas passé ici.
+ * Tout part en un seul appel RPC (migrations 006 puis 007) : le client Supabase
+ * ne sait pas ouvrir de transaction, la fonction plpgsql en est une. L'user_id
+ * vient de auth.uid() côté serveur, il n'est donc pas passé ici.
+ *
+ * Le profil complet accompagne le programme parce que le payload du programme
+ * ne porte que ce qui sert à `programs` (objectif, niveau, durée) : ni les 1RM,
+ * ni l'équipement, ni les limitations, ni l'anthropométrie. Sans lui, `profiles`
+ * resterait la ligne vide créée par le trigger `handle_new_user`.
  *
  * Les slugs sont résolus en uuid dans le SQL — aucune requête préalable sur
  * `exercises`. charge_kg et contre_indication sont dérivés : ignorés à l'insert.
  *
  * @returns l'id du programme créé.
  */
-export async function enregistrerProgramme(programme: GeneratedProgram): Promise<string> {
-  const payload = { ...programme.program, sessions: programme.sessions };
+export async function enregistrerProgramme(
+  programme: GeneratedProgram,
+  // Les champs du moteur sont garantis par `estComplet` ; ceux qui ne servent
+  // qu'à `profiles` (prénom, poids, 5 km) restent facultatifs — le quiz ne les
+  // demande pas tous, et le SQL accepte leur absence.
+  profil: GeneratorProfile & ProfilPartiel,
+): Promise<string> {
+  const payload = {
+    ...programme.program,
+    date_debut: dateLocaleIso(new Date()),
+    profil,
+    sessions: programme.sessions,
+  };
 
   // ponytail: 3 tentatives sur erreur réseau. Un timeout après commit côté
   // serveur créerait un doublon — passer par un id généré au client si ça arrive.
@@ -118,7 +137,7 @@ export async function enregistrerProgrammeEnAttente(): Promise<string> {
   const profil = await lireProfil();
   if (!estComplet(profil)) throw new ProfilIncompletError();
 
-  const programId = await enregistrerProgramme(genererProgramme(profil));
+  const programId = await enregistrerProgramme(genererProgramme(profil), profil);
   await effacerProfil();
   return programId;
 }

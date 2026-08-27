@@ -54,3 +54,15 @@ export function semaineEtJour(dateDebut: string, aujourdhui: Date): { semaine: n
   // d'hiver. `floor` perdrait une semaine entière sur cette heure-là.
   return { semaine: Math.round(ecart / MS_JOUR / 7) + 1, jour: jourIso(aujourdhui) };
 }
+
+/**
+ * `YYYY-MM-DD` dans le fuseau de l'appareil, au format de la colonne `date`.
+ *
+ * `current_date` côté Postgres s'évalue en UTC : une insertion à 00 h 58 à
+ * Paris datait `programs.date_debut` de la veille, et tout le calcul de semaine
+ * ci-dessus part de cette colonne. La date est donc décidée par le client.
+ */
+export function dateLocaleIso(d: Date): string {
+  const deuxChiffres = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${deuxChiffres(d.getMonth() + 1)}-${deuxChiffres(d.getDate())}`;
+}
