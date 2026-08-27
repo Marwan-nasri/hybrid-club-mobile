@@ -24,6 +24,18 @@ export const Colors = {
   },
 } as const;
 
+/**
+ * Les couleurs du design system vivent dans `tailwind.config.js` et s'utilisent
+ * en `className`. `Switch` fait exception : c'est un composant natif, il ne
+ * prend que des valeurs. Reprises ici pour ne pas les écrire en dur dans un
+ * écran — à garder synchronisées avec tailwind.config.js.
+ */
+export const DesignColors = {
+  accent: '#D4F227',
+  border: '#2A2A2E',
+  surfaceElevated: '#1C1C1F',
+} as const;
+
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
 export const Fonts = Platform.select({

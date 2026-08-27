@@ -229,7 +229,7 @@ const CRENEAUX_JOUR: Record<number, number[]> = {
   7: [1, 2, 3, 4, 5, 6, 7],
 };
 
-const LIBELLE_OBJECTIF: Record<GoalType, string> = {
+export const LIBELLE_OBJECTIF: Record<GoalType, string> = {
   hyrox: 'Hyrox',
   marathon_muscu: 'Marathon & muscu',
   recomposition: 'Recomposition',

@@ -4,6 +4,11 @@ module.exports = {
   presets: [require('nativewind/preset')],
   theme: {
     extend: {
+      // Source des couleurs du design system. Trois d'entre elles sont
+      // dupliquées dans `DesignColors` (src/constants/theme.ts) pour les
+      // composants natifs qui ne prennent pas de className (Switch) :
+      // toute modification d'accent, border ou surface.elevated doit y être
+      // reportée.
       colors: {
         background: '#0A0A0B',
         surface: { DEFAULT: '#141416', elevated: '#1C1C1F' },

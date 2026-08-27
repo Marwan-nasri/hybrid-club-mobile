@@ -61,6 +61,37 @@ export async function estAbonne(): Promise<boolean> {
 }
 
 /**
+ * L'état de l'abonnement, pour l'affichage du profil.
+ *
+ * `entitlements.active` ne dit que « a accès ou non ». Le profil doit
+ * distinguer un essai en cours d'un abonnement payant, et un abonnement expiré
+ * d'un compte qui n'a jamais rien acheté — d'où la relecture de
+ * `entitlements.all`, qui conserve les droits échus.
+ */
+export type StatutAbonnement =
+  | { etat: 'actif' | 'essai'; expire_le: string | null; renouvelle: boolean }
+  | { etat: 'expire'; expire_le: string | null }
+  | { etat: 'aucun' };
+
+export async function statutAbonnement(): Promise<StatutAbonnement> {
+  const info = await Purchases.getCustomerInfo();
+
+  const encours = info.entitlements.active[ENTITLEMENT];
+  if (encours) {
+    return {
+      etat: encours.periodType === 'TRIAL' ? 'essai' : 'actif',
+      expire_le: encours.expirationDate,
+      renouvelle: encours.willRenew,
+    };
+  }
+
+  const echu = info.entitlements.all[ENTITLEMENT];
+  if (echu) return { etat: 'expire', expire_le: echu.expirationDate };
+
+  return { etat: 'aucun' };
+}
+
+/**
  * Achat. Renvoie `false` si l'utilisateur a annulé — annuler n'est pas une
  * erreur et ne doit rien afficher. Les vrais échecs (carte refusée, réseau)
  * remontent en exception.
@@ -97,4 +128,21 @@ export async function restaurer(): Promise<boolean> {
  */
 export async function lierCompte(idUtilisateur: string): Promise<void> {
   await Purchases.logIn(idUtilisateur);
+}
+
+/**
+ * Détache le compte de l'identité RevenueCat, à la déconnexion.
+ *
+ * Sans ça, l'identité posée par `lierCompte` survit à la déconnexion : le
+ * compte suivant sur cet appareil hérite de l'accès premium du précédent tant
+ * qu'il n'a pas créé son propre compte. `logOut` regénère un identifiant
+ * anonyme.
+ *
+ * Le garde-fou n'est pas cosmétique : `logOut` rejette quand l'identité est
+ * déjà anonyme — ce qui est le cas normal d'un compte créé avant l'intégration
+ * RevenueCat, ou d'une session restaurée sans passer par le paywall.
+ */
+export async function delierCompte(): Promise<void> {
+  if (await Purchases.isAnonymous()) return;
+  await Purchases.logOut();
 }

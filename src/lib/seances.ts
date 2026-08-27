@@ -1,7 +1,7 @@
 import { semaineEtJour } from './calendrier';
 import { supabase } from './supabase';
 
-import type { CardioType, Intervalles, LevelType, SessionType } from './programGenerator';
+import type { CardioType, GoalType, Intervalles, LevelType, SessionType } from './programGenerator';
 
 const LIBELLE_CARDIO: Record<CardioType, string> = {
   course: 'Course',
@@ -154,6 +154,7 @@ export type JourProgramme = {
 export type BlocProgramme = {
   id: string;
   nom: string;
+  objectif: GoalType;
   niveau: LevelType;
   duree_semaines: number;
   /** Semaine courante, bornée au bloc : avant le début → 1, après la fin → la dernière. */
@@ -177,7 +178,7 @@ export type EtatBloc = { statut: 'sans_programme' } | { statut: 'ok'; bloc: Bloc
 export async function chargerBloc(aujourdhui: Date): Promise<EtatBloc> {
   const { data: programme, error } = await supabase
     .from('programs')
-    .select('id, nom, niveau, date_debut, duree_semaines')
+    .select('id, nom, objectif, niveau, date_debut, duree_semaines')
     .eq('is_active', true)
     .maybeSingle();
 
@@ -207,6 +208,7 @@ export async function chargerBloc(aujourdhui: Date): Promise<EtatBloc> {
     bloc: {
       id: programme.id,
       nom: programme.nom,
+      objectif: programme.objectif,
       niveau: programme.niveau,
       duree_semaines: programme.duree_semaines,
       semaine_courante: Math.min(Math.max(semaine, 1), programme.duree_semaines),

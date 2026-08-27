@@ -178,6 +178,20 @@ Le catalogue d'exercices est **embarqué dans l'app**, pas lu en base : le revea
     `workout_logs.date_debut` : une séance reprise après un crash repart de
     zéro. À recaler sur la colonne quand l'offline sera traité.
 
+- Édition du profil après l'onboarding : aucun champ n'est modifiable une fois
+  le quiz passé. Limitations, 1RM, jours dispo, équipement et poids sont figés à
+  vie sur `profiles`, alors que ce sont précisément les entrées du moteur — une
+  blessure qui guérit, un 1RM qui monte ou un jour libéré n'ont aucun chemin
+  pour remonter. L'onglet Profil (B10) ne pose volontairement que les deux
+  préférences d'affichage. Chantier dédié : rééditer ces champs implique de
+  décider quoi faire du programme en cours (le laisser tel quel, ou régénérer —
+  ce qui rejoint le chantier fin de cycle / `program_cycles`).
+
+- Notifications : `profiles.notifications_actives` est lu et écrit par l'onglet
+  Profil, mais rien ne planifie de notification. Ni `expo-notifications`, ni
+  demande de permission, ni programmation des rappels de séance. La préférence
+  existe, l'effet non.
+
 - Tagger des exercices en `home_gym` : aucun exercice du catalogue n'utilise ce
   niveau d'équipement, et tous les mouvements à la barre (back-squat, deadlift,
   bench-press, overhead-press, barbell-row) demandent `salle_complete`. Un
