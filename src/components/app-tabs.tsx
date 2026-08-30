@@ -25,6 +25,11 @@ export default function AppTabs() {
         <NativeTabs.Trigger.Icon sf="calendar" />
       </NativeTabs.Trigger>
 
+      <NativeTabs.Trigger name="progression">
+        <NativeTabs.Trigger.Label>Progression</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf="chart.bar" />
+      </NativeTabs.Trigger>
+
       <NativeTabs.Trigger name="explore">
         <NativeTabs.Trigger.Label>Composants</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon

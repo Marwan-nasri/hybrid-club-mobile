@@ -168,38 +168,72 @@ export type BlocProgramme = {
 
 export type EtatBloc = { statut: 'sans_programme' } | { statut: 'ok'; bloc: BlocProgramme };
 
-/**
- * L'en-tête de l'onglet Programme : le bloc actif et sa progression réelle.
- *
- * `seances_terminees` compte les `workout_logs` à `termine` rattachés à ce
- * programme, via la jointure interne sur `sessions` — un log d'un bloc archivé
- * ne doit pas gonfler la progression du bloc courant.
- */
-export async function chargerBloc(aujourdhui: Date): Promise<EtatBloc> {
-  const { data: programme, error } = await supabase
+export type ProgrammeActif = {
+  id: string;
+  nom: string;
+  objectif: GoalType;
+  niveau: LevelType;
+  date_debut: string;
+  duree_semaines: number;
+};
+
+/** Le bloc actif, ou `null` s'il n'y en a pas. Le programme est unique par user. */
+export async function programmeActif(): Promise<ProgrammeActif | null> {
+  const { data, error } = await supabase
     .from('programs')
     .select('id, nom, objectif, niveau, date_debut, duree_semaines')
     .eq('is_active', true)
-    .maybeSingle();
+    .maybeSingle<ProgrammeActif>();
 
   if (error) throw error;
-  if (!programme) return { statut: 'sans_programme' };
+  return data;
+}
 
-  const [total, terminees] = await Promise.all([
-    supabase
-      .from('sessions')
-      .select('id', { count: 'exact', head: true })
-      .eq('program_id', programme.id),
-    supabase
-      .from('workout_logs')
-      .select('id, sessions!inner(program_id)', { count: 'exact', head: true })
-      .eq('statut', 'termine')
-      .eq('sessions.program_id', programme.id),
-  ]);
+/**
+ * Séances terminées / séances prescrites, sur tout le bloc ou sur une tranche
+ * de semaines.
+ *
+ * `terminees` compte les `workout_logs` à `termine` rattachés à ce programme,
+ * via la jointure interne sur `sessions` — un log d'un bloc archivé ne doit pas
+ * gonfler la progression du bloc courant. La tranche se donne en semaines et
+ * non en dates : c'est `sessions.semaine` qui porte le calendrier du prescrit.
+ */
+export async function compterSeances(
+  programId: string,
+  semaines?: { de: number; a: number },
+): Promise<{ total: number; terminees: number }> {
+  let prescrites = supabase
+    .from('sessions')
+    .select('id', { count: 'exact', head: true })
+    .eq('program_id', programId);
+
+  let faites = supabase
+    .from('workout_logs')
+    .select('id, sessions!inner(program_id, semaine)', { count: 'exact', head: true })
+    .eq('statut', 'termine')
+    .eq('sessions.program_id', programId);
+
+  if (semaines) {
+    prescrites = prescrites.gte('semaine', semaines.de).lte('semaine', semaines.a);
+    faites = faites.gte('sessions.semaine', semaines.de).lte('sessions.semaine', semaines.a);
+  }
+
+  const [total, terminees] = await Promise.all([prescrites, faites]);
 
   if (total.error) throw total.error;
   if (terminees.error) throw terminees.error;
 
+  return { total: total.count ?? 0, terminees: terminees.count ?? 0 };
+}
+
+/**
+ * L'en-tête de l'onglet Programme : le bloc actif et sa progression réelle.
+ */
+export async function chargerBloc(aujourdhui: Date): Promise<EtatBloc> {
+  const programme = await programmeActif();
+  if (!programme) return { statut: 'sans_programme' };
+
+  const { total, terminees } = await compterSeances(programme.id);
   const { semaine, jour } = semaineEtJour(programme.date_debut, aujourdhui);
   const horsBloc = semaine < 1 || semaine > programme.duree_semaines;
 
@@ -214,8 +248,8 @@ export async function chargerBloc(aujourdhui: Date): Promise<EtatBloc> {
       semaine_courante: Math.min(Math.max(semaine, 1), programme.duree_semaines),
       hors_bloc: horsBloc,
       jour,
-      total_seances: total.count ?? 0,
-      seances_terminees: terminees.count ?? 0,
+      total_seances: total,
+      seances_terminees: terminees,
     },
   };
 }

@@ -208,9 +208,17 @@ Le catalogue d'exercices est **embarqué dans l'app**, pas lu en base : le revea
 - ESLint : `expo lint` installe eslint + eslint-config-expo (2 devDependencies +
   réécriture du lockfile) et génère `eslint.config.js`. Décidé de le garder,
   mais après le quiz — pas pendant.
-- Lien « J'ai déjà un compte » de la maquette A1 : absent d'`accroche.tsx`. Il
-  n'y a pas d'écran de connexion, et `creer-compte.tsx` est un signup
-  post-achat. À poser avec l'écran de connexion.
+- Écran de connexion : n'existe pas. `creer-compte.tsx` est un signup
+  post-achat, et le lien « J'ai déjà un compte » de la maquette A1 est absent
+  d'`accroche.tsx`. Deux choses en dépendent, à traiter dans la même passe :
+  - le lien A1 lui-même ;
+  - **tester `signOut()` complet ⟵ nécessite l'écran de connexion.** Le bouton
+    « Se déconnecter » de l'onglet Profil appelle `delierCompte()` puis
+    `supabase.auth.signOut()` puis `router.replace('/accroche')`. Seul
+    `delierCompte()` est vérifié (2026-08-27) : dérouler la déconnexion
+    entière laisserait le simulateur sans session et sans moyen de revenir
+    dans l'app autrement qu'en refaisant tout l'onboarding. Ne pas le tester
+    tant que l'écran de connexion n'est pas posé.
 
 ## État d'avancement
 

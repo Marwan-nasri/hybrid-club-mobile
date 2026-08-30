@@ -31,10 +31,25 @@ export function jourIso(d: Date): number {
 }
 
 /** Minuit local du lundi de la semaine de `d`. */
-function lundiDe(d: Date): Date {
+export function lundiDe(d: Date): Date {
   const lundi = new Date(d.getFullYear(), d.getMonth(), d.getDate());
   lundi.setDate(lundi.getDate() - (jourIso(d) - 1));
   return lundi;
+}
+
+/**
+ * Le numéro de semaine ISO, pour les libellés « S27 » du graphique de volume.
+ *
+ * La semaine ISO est celle de son jeudi : on ramène `d` au jeudi de sa semaine,
+ * puis on compte les semaines depuis le 1er janvier de *cette* année-là — c'est
+ * ce décalage qui donne les bons numéros à cheval sur deux années.
+ */
+export function numeroSemaineIso(d: Date): number {
+  const jeudi = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 4 - jourIso(d));
+  const jan1 = new Date(jeudi.getFullYear(), 0, 1);
+  // `round` avant la division : les changements d'heure décalent les minuits
+  // locaux de ±1 h, ce qui suffirait à faire tomber un `floor` d'un cran.
+  return Math.floor(Math.round((jeudi.getTime() - jan1.getTime()) / MS_JOUR) / 7) + 1;
 }
 
 /**

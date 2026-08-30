@@ -49,6 +49,7 @@
     "build:catalogue": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/build-exercise-bundle.ts",
     "audit:substitutions": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/audit-substitutions.ts",
     "test:insertion": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-insertion-programme.ts",
+    "test:progression": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-progression.ts",
     "test:calendrier": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-calendrier.ts"
   },
   "private": true
