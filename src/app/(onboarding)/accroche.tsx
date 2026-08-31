@@ -41,8 +41,13 @@ export default function AccrocheScreen() {
             tes vraies performances.
           </Text>
 
-          <View className="mt-8">
+          <View className="mt-8 gap-2">
             <Button label="Commencer" onPress={() => router.push('/quiz/objectif')} />
+            <Button
+              label="J'ai déjà un compte"
+              variant="ghost"
+              onPress={() => router.push('/connexion')}
+            />
           </View>
         </View>
       </SafeAreaView>

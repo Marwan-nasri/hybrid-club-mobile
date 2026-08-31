@@ -1,3 +1,4 @@
+import * as AppleAuthentication from 'expo-apple-authentication';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, ScrollView, Text, View } from 'react-native';
@@ -5,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { appleDisponible, connexionAvecApple } from '@/lib/auth';
 import { enregistrerProgrammeEnAttente, ProfilIncompletError } from '@/lib/programme';
 import { lierCompte } from '@/lib/purchases';
 import { supabase } from '@/lib/supabase';
@@ -82,6 +84,11 @@ export default function CreerCompteScreen() {
   const [email, setEmail] = useState('');
   const [motDePasse, setMotDePasse] = useState('');
   const [erreur, setErreur] = useState<string | null>(null);
+  const [apple, setApple] = useState(false);
+
+  useEffect(() => {
+    appleDisponible().then(setApple).catch(() => setApple(false));
+  }, []);
 
   /**
    * Insère le programme et atterrit. Le compte existe déjà à ce stade : en cas
@@ -128,6 +135,31 @@ export default function CreerCompteScreen() {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  /**
+   * Même flux qu'un signUp email : Apple ouvre la session, l'insertion suit.
+   *
+   * `signInWithIdToken` ne distingue pas création et connexion, mais ici la
+   * distinction n'a pas lieu d'être — on n'atteint cet écran qu'après le
+   * paywall, avec un profil d'onboarding en attente. `inserer` est idempotent
+   * du point de vue de l'appelant : il ne consomme le profil qu'après succès.
+   */
+  const parApple = async () => {
+    setEtat('chargement');
+    setErreur(null);
+    try {
+      const resultat = await connexionAvecApple();
+      if (resultat.statut === 'annule') {
+        setEtat('formulaire');
+        return;
+      }
+      reprisEnCharge.current = true;
+      await inserer();
+    } catch (e) {
+      setErreur(e instanceof Error ? e.message : 'La connexion avec Apple a échoué.');
+      setEtat('formulaire');
+    }
+  };
 
   const soumettre = async () => {
     const adresse = email.trim();
@@ -241,6 +273,16 @@ export default function CreerCompteScreen() {
             <View className="mt-8">
               <Button label="Créer mon compte" onPress={soumettre} />
             </View>
+
+            {apple ? (
+              <AppleAuthentication.AppleAuthenticationButton
+                buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_UP}
+                buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.WHITE}
+                cornerRadius={12}
+                style={{ height: 56, marginTop: 12 }}
+                onPress={parApple}
+              />
+            ) : null}
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>

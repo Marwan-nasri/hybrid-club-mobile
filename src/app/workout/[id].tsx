@@ -11,11 +11,14 @@ import {
   chargerSeance,
   demarrerSeance,
   enregistrerSerie,
+  etatSeance,
   supprimerSerie,
   terminerSeance,
 } from '@/lib/seanceLive';
+import { decoderCle } from '@/lib/seanceLocale';
 
 import type { Bloc, BlocExercice, SeanceLive } from '@/lib/seanceLive';
+import type { EtatSeance } from '@/lib/seanceLocale';
 
 type SetState = { weight: string; reps: string; validated: boolean };
 
@@ -44,6 +47,39 @@ function prerempli(bloc: BlocExercice): SetState[] {
     reps: bloc.precedent?.reps ? String(bloc.precedent.reps) : repsPrescrites,
     validated: false,
   }));
+}
+
+/**
+ * Recouvre le pré-remplissage avec ce qui a déjà été validé.
+ *
+ * Sans ça, l'app relancée en pleine séance repartait de séries vierges alors
+ * que le réalisé existait — en base comme en local. Une série ajoutée à la
+ * main au-delà du nombre prescrit est réintégrée : le tableau s'étend jusqu'au
+ * plus grand numéro trouvé.
+ */
+function reprise(bloc: BlocExercice, etat: EtatSeance | null): SetState[] {
+  const base = prerempli(bloc);
+  const faites = Object.entries(etat?.series ?? {}).flatMap(([cle, valeurs]) => {
+    const { exercise_id, serie } = decoderCle(cle);
+    return valeurs && exercise_id === bloc.exercise_id
+      ? [[serie, valeurs] as const]
+      : [];
+  });
+
+  const total = Math.max(base.length, ...faites.map(([serie]) => serie));
+  const lignes = Array.from(
+    { length: total },
+    (_, i) => base[i] ?? { weight: '', reps: '', validated: false },
+  );
+
+  for (const [serie, valeurs] of faites) {
+    lignes[serie - 1] = {
+      weight: versAffichage(valeurs.charge_kg),
+      reps: valeurs.reps === null ? '' : String(valeurs.reps),
+      validated: true,
+    };
+  }
+  return lignes;
 }
 
 function formatChrono(secondes: number) {
@@ -101,7 +137,10 @@ export default function WorkoutScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const [seance, setSeance] = useState<SeanceLive | null>(null);
-  const [workoutLogId, setWorkoutLogId] = useState<string | null>(null);
+  // Un `client_uuid`, pas l'`id` de `workout_logs` : celui-ci n'existe qu'après
+  // la première synchronisation, et la séance doit tourner sans.
+  const [clientUuid, setClientUuid] = useState<string | null>(null);
+  const [debutMs, setDebutMs] = useState<number | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
   const [echec, setEchec] = useState(false);
   const [seriesParBloc, setSeriesParBloc] = useState<SetState[][]>([]);
@@ -117,19 +156,27 @@ export default function WorkoutScreen() {
     (async () => {
       try {
         const donnees = await chargerSeance(id);
+        const uuid = await demarrerSeance(id);
+        const etat = await etatSeance(uuid);
         setSeance(donnees);
-        setSeriesParBloc(donnees.blocs.map((b) => (b.kind === 'exercice' ? prerempli(b) : [])));
-        setWorkoutLogId(await demarrerSeance(id));
+        setSeriesParBloc(donnees.blocs.map((b) => (b.kind === 'exercice' ? reprise(b, etat) : [])));
+        setClientUuid(uuid);
+        setDebutMs(etat ? Date.parse(etat.debut_iso) : Date.now());
       } catch {
         setEchec(true);
       }
     })();
   }, [id]);
 
+  // Le chrono part de `debut_iso`, pas de l'ouverture de l'écran : une séance
+  // reprise après un crash repartait sinon de zéro.
   useEffect(() => {
-    const timer = setInterval(() => setChrono((s) => s + 1), 1000);
+    if (debutMs === null) return;
+    const maj = () => setChrono(Math.max(0, Math.round((Date.now() - debutMs) / 1000)));
+    maj();
+    const timer = setInterval(maj, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [debutMs]);
 
   const majSerie = useCallback(
     (index: number, patch: Partial<SetState>) =>
@@ -171,12 +218,15 @@ export default function WorkoutScreen() {
    * Valide ou dévalide une série, et la répercute en base.
    *
    * L'état bascule d'abord — le retour haptique est déjà parti, revenir en
-   * arrière visuellement serait pire que d'attendre. En cas d'échec on annule
-   * la bascule et on le dit : une série qu'on croit enregistrée et qui ne l'est
-   * pas, c'est une séance perdue.
+   * arrière visuellement serait pire que d'attendre. Le réseau n'intervient
+   * plus ici : `enregistrerSerie` écrit l'état local et rend la main, la
+   * synchronisation part en tâche de fond. Une coupure ne peut donc plus faire
+   * échouer une validation. L'erreur qui reste est un échec d'écriture locale ;
+   * on annule la bascule et on le dit, une série qu'on croit enregistrée et qui
+   * ne l'est pas c'est une séance perdue.
    */
   const basculerSerie = async (index: number) => {
-    if (!exercice || !workoutLogId) return;
+    if (!exercice || !clientUuid) return;
     const avant = series[index];
     const valide = !avant.validated;
     majSerie(index, { validated: valide });
@@ -184,7 +234,7 @@ export default function WorkoutScreen() {
 
     try {
       if (valide) {
-        await enregistrerSerie(workoutLogId, {
+        await enregistrerSerie(clientUuid, {
           exercise_id: exercice.exercise_id,
           serie: index + 1,
           reps: versNombre(avant.reps),
@@ -192,20 +242,20 @@ export default function WorkoutScreen() {
           rpe: exercice.rpe,
         });
       } else {
-        await supprimerSerie(workoutLogId, exercice.exercise_id, index + 1);
+        await supprimerSerie(clientUuid, exercice.exercise_id, index + 1);
       }
     } catch {
       majSerie(index, { validated: avant.validated });
-      setErreur("Cette série n'a pas été enregistrée. Vérifie ta connexion.");
+      setErreur("Cette série n'a pas été enregistrée. Réessaie.");
     }
   };
 
   const terminer = async () => {
-    if (!workoutLogId || cloture) return;
+    if (!clientUuid || cloture) return;
     setCloture(true);
     setErreur(null);
     try {
-      await terminerSeance(workoutLogId, chrono);
+      await terminerSeance(clientUuid, chrono);
       router.replace('/(tabs)');
     } catch {
       setCloture(false);

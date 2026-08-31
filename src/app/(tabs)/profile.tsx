@@ -9,6 +9,7 @@ import { DesignColors } from '@/constants/theme';
 import { chargerProfil, formatPoids, majPreferences } from '@/lib/profil';
 import { LIBELLE_OBJECTIF } from '@/lib/programGenerator';
 import { delierCompte, statutAbonnement } from '@/lib/purchases';
+import { oublierSeancesLocales, synchroniser } from '@/lib/seanceLive';
 import { chargerBloc } from '@/lib/seances';
 import { supabase } from '@/lib/supabase';
 
@@ -187,6 +188,15 @@ export default function ProfilScreen() {
 
   const charger = useCallback(async () => {
     setErreur(false);
+
+    // Lancé en même temps que les lectures Supabase, pas après : RevenueCat ne
+    // conditionne rien d'autre que sa propre carte, l'attendre en file derrière
+    // le profil ne retardait que lui-même. Le `catch` est posé tout de suite,
+    // sinon le rejet serait non géré avant qu'on arrive au `await`.
+    const abonnementEnCours = statutAbonnement().catch(
+      () => 'indisponible' as const,
+    );
+
     try {
       const [p, b] = await Promise.all([chargerProfil(date), chargerBloc(date)]);
       setProfil(p);
@@ -194,12 +204,12 @@ export default function ProfilScreen() {
     } catch {
       setErreur(true);
     }
-    // À part : un RevenueCat injoignable ne doit pas emporter tout l'écran.
-    try {
-      setAbonnement(await statutAbonnement());
-    } catch {
-      setAbonnement('indisponible');
-    }
+
+    // La garde de rendu ne dépend que de `profil` et `bloc` : l'écran est déjà
+    // à l'écran quand cette ligne s'exécute, et la carte abonnement affiche
+    // « Chargement… » en attendant. Un RevenueCat lent ou injoignable ne coûte
+    // que cette carte.
+    setAbonnement(await abonnementEnCours);
   }, [date]);
 
   useFocusEffect(
@@ -228,6 +238,17 @@ export default function ProfilScreen() {
   );
 
   const deconnecter = useCallback(async () => {
+    // Dernière tentative de pousser ce qui attend, tant qu'on est encore sous
+    // la bonne session — sinon la purge qui suit perdrait une séance jouée
+    // hors ligne. `synchroniser` ne rejette jamais et ne fait rien s'il n'y a
+    // rien à pousser.
+    await synchroniser();
+
+    // Puis on efface : ces clés ne portent aucun utilisateur, et le compte
+    // suivant sur l'appareil se les approprierait. On n'attrape pas l'échec —
+    // se déconnecter sans avoir purgé, c'est exactement la fuite qu'on évite.
+    await oublierSeancesLocales();
+
     // RevenueCat avant Supabase : détacher l'identité demande le réseau, et il
     // vaut mieux le tenter tant que la session est encore valide.
     //

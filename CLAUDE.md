@@ -168,15 +168,46 @@ Le catalogue d'exercices est **embarqué dans l'app**, pas lu en base : le revea
     le réécrire sur le profil — pas fait, il n'était pas dans le périmètre.
   - Pas de note de fin de séance ni de ressenti (`workout_logs.note`,
     `ressenti`), volontairement.
-  - Offline : écriture directe à chaque validation de série, aucune file
-    d'attente. Une coupure réseau en pleine séance perd la série. Le
-    `client_uuid` est posé sur `workout_logs` pour que la déduplication soit
-    possible le jour où la synchro différée arrive — c'est la seule chose de
-    l'offline qui existe aujourd'hui. Contradiction assumée avec la règle
-    « offline-first obligatoire » du présent fichier, à lever avant TestFlight.
-  - `duree_sec` compte depuis l'ouverture de l'écran, pas depuis
-    `workout_logs.date_debut` : une séance reprise après un crash repart de
-    zéro. À recaler sur la colonne quand l'offline sera traité.
+  - Offline : traité le 2026-08-30. L'état de la séance en cours vit dans
+    AsyncStorage (`seanceLocale.ts`, logique pure et testée), les écritures
+    sont locales d'abord, et `synchroniser()` (`seanceLive.ts`) pousse en
+    tâche de fond — après chaque écriture, au démarrage (`_layout.tsx`) et au
+    retour au premier plan. L'identifiant manipulé par l'écran est le
+    `client_uuid`, pas l'`id` de `workout_logs` : la séance est démarrable et
+    jouable sans réseau. La déduplication s'appuie sur les deux contraintes
+    uniques existantes, vérifiées sur la base réelle — aucune migration.
+    Corrigé au passage : l'écran ne relisait jamais le réalisé, une séance
+    reprise après un redémarrage repartait de séries vierges alors qu'elles
+    étaient en base.
+    Hors périmètre, assumé : le cache de lecture ne couvre que la séance déjà
+    chargée une fois (`prescrit.<session_id>`), pas le programme complet, et
+    il n'a pas d'invalidation — à revoir avec `program_cycles`. Pas de
+    NetInfo : l'échec de l'appel fait office de détection, chaque validation
+    hors ligne tente donc un appel perdu.
+  - `duree_sec` : recalé sur `debut_iso` de l'état local. Une séance reprise
+    après un crash retrouve son chrono.
+
+- L'état local de séance survivait à la déconnexion : les clés
+  `seance.<client_uuid>` n'étaient purgées ni par `signOut()` ni au changement
+  de compte, et une séance jamais synchronisée aurait été insérée sous le
+  compte suivant (la RLS l'autorise, `user_id` valant `auth.uid()`). Corrigé le
+  2026-08-31 : `deconnecter` fait une dernière `synchroniser()` sous la bonne
+  session, puis `oublierSeancesLocales()` efface `seance.*` et `prescrit.*`
+  avant `signOut()`. Vérifié sur simulateur, AsyncStorage revient vide.
+  L'échec de la purge n'est pas attrapé — se déconnecter sans avoir purgé,
+  c'est exactement la fuite qu'on évite. Durcissement possible mais non fait :
+  porter le `user_id` dans `EtatSeance` et l'ignorer dans `pousser()` s'il ne
+  correspond pas à la session courante. Aujourd'hui la purge suffit, changer de
+  compte passant forcément par ce bouton.
+
+- Un spinner de ~90 s a été observé sur l'onglet Profil le 2026-08-31, et
+  attribué à tort à `statutAbonnement()`. Re-mesuré : l'écran se rend en moins
+  de 2 s, carte abonnement comprise. La garde de rendu ne porte que sur
+  `profil` et `bloc` — `abonnement` en est déjà exclu et `CarteAbonnement`
+  affiche son propre « Chargement… ». Les 90 s venaient du partage de connexion
+  instable de cette nuit-là, pas du code. Seule correction réelle apportée :
+  `statutAbonnement()` part désormais en parallèle des lectures Supabase au
+  lieu d'être sérialisé derrière, ce qui ne retardait que sa propre carte.
 
 - Édition du profil après l'onboarding : aucun champ n'est modifiable une fois
   le quiz passé. Limitations, 1RM, jours dispo, équipement et poids sont figés à
@@ -202,23 +233,38 @@ Le catalogue d'exercices est **embarqué dans l'app**, pas lu en base : le revea
 - Insertion Supabase : `creer_programme` (migration 006, RPC atomique) est
   branchée — `creer-compte.tsx` appelle `enregistrerProgrammeEnAttente()`
   depuis le commit 3d98533. Vérifiée le 2026-08-22 sur le projet de dev
-  (60 séances / 276 blocs), mais avec le profil de démo : reste à la repasser
-  sur un profil venu du vrai quiz, une fois les 8 écrans posés. Test manuel :
+  (60 séances / 276 blocs) avec le profil de démo, puis le 2026-08-31 sur un
+  profil venu du vrai quiz (hyrox / intermédiaire / 4 jours / salle complète /
+  épaule → 48 séances, `profiles` rempli, `onboarding_complete` à `true`).
+  Test manuel :
   `npm run test:insertion` (voir en-tête du script pour les variables).
 - ESLint : `expo lint` installe eslint + eslint-config-expo (2 devDependencies +
   réécriture du lockfile) et génère `eslint.config.js`. Décidé de le garder,
   mais après le quiz — pas pendant.
-- Écran de connexion : n'existe pas. `creer-compte.tsx` est un signup
-  post-achat, et le lien « J'ai déjà un compte » de la maquette A1 est absent
-  d'`accroche.tsx`. Deux choses en dépendent, à traiter dans la même passe :
-  - le lien A1 lui-même ;
-  - **tester `signOut()` complet ⟵ nécessite l'écran de connexion.** Le bouton
-    « Se déconnecter » de l'onglet Profil appelle `delierCompte()` puis
-    `supabase.auth.signOut()` puis `router.replace('/accroche')`. Seul
-    `delierCompte()` est vérifié (2026-08-27) : dérouler la déconnexion
-    entière laisserait le simulateur sans session et sans moyen de revenir
-    dans l'app autrement qu'en refaisant tout l'onboarding. Ne pas le tester
-    tant que l'écran de connexion n'est pas posé.
+- Écran de connexion : posé le 2026-08-31 (`(auth)/connexion.tsx`), avec le
+  lien « J'ai déjà un compte » de la maquette A1 sur `accroche.tsx`.
+  `signOut()` est désormais vérifié de bout en bout — quiz, création de compte,
+  onglets, déconnexion, reconnexion, atterrissage sur les onglets avec le bon
+  programme. Restent ouverts :
+  - **Sign in with Apple : code écrit, provider non configuré.**
+    `src/lib/auth.ts` porte `connexionAvecApple()`, partagée par la création de
+    compte et la connexion — `signInWithIdToken` ne distingue pas les deux, et
+    ce qui diffère est ce qui suit (insertion du programme d'un côté, rien de
+    l'autre). `app.json` a le plugin et `ios.usesAppleSignIn`. Rien ne marchera
+    tant que la capability « Sign in with Apple » (App ID + clé) côté Apple
+    Developer Portal et le provider Apple (Team ID / Key ID / clé privée) côté
+    Supabase ne sont pas faits. Le bouton n'apparaît pas sur un dev build
+    antérieur à l'ajout du module natif : `isAvailableAsync()` échoue et le
+    `.catch` le masque — dégradation voulue, pas un bug. Refaire `expo run:ios`.
+  - Le bouton Apple utilise `AppleAuthenticationButton` (rendu imposé par la
+    review Apple), pas le `Button` du design system. Deux boutons pleine
+    largeur cohabitent donc sur ces écrans, l'accent et un blanc. La règle
+    « une seule action accent » tient à la lettre, l'équilibre visuel est à
+    trancher.
+  - Pas de « mot de passe oublié », hors périmètre assumé.
+  - `mailer_autoconfirm` est à `true` sur le projet : la branche « ton compte
+    doit être confirmé » de `creer-compte.tsx` est morte tant que ce réglage
+    tient. Gardée comme garde-fou.
 
 ## État d'avancement
 

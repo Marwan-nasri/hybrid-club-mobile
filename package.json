@@ -7,6 +7,7 @@
     "@react-native-async-storage/async-storage": "2.2.0",
     "@supabase/supabase-js": "^2.112.3",
     "expo": "~57.0.14",
+    "expo-apple-authentication": "~57.0.1",
     "expo-constants": "~57.0.12",
     "expo-device": "~57.0.1",
     "expo-font": "~57.0.1",
@@ -50,7 +51,8 @@
     "audit:substitutions": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/audit-substitutions.ts",
     "test:insertion": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-insertion-programme.ts",
     "test:progression": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-progression.ts",
-    "test:calendrier": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-calendrier.ts"
+    "test:calendrier": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-calendrier.ts",
+    "test:seance-offline": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-seance-offline.ts"
   },
   "private": true
 }
