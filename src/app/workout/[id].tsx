@@ -1,3 +1,4 @@
+import * as Haptics from 'expo-haptics';
 import { useKeepAwake } from 'expo-keep-awake';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -7,6 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { SetRow } from '@/components/ui/SetRow';
+import { Sheet } from '@/components/ui/Sheet';
 import {
   chargerSeance,
   demarrerSeance,
@@ -130,6 +132,67 @@ function CarteCardio({ bloc }: { bloc: Extract<Bloc, { kind: 'cardio' }> }) {
   );
 }
 
+/**
+ * Le repos entre deux séries, déclenché par la validation.
+ *
+ * Pas de maquette : B5 n'existe pas dans `design-reference/`, seul le cadrage
+ * écrit la décrit (gros décompte, ±15 s, « Passer », exercice visible
+ * derrière). Le décompte vise un instant de fin plutôt que de décrémenter un
+ * compteur : JS throttlé ou pas, l'affichage reste juste.
+ *
+ * Pas de notification système — l'app doit rester ouverte, c'est assumé pour
+ * cette passe.
+ */
+function SheetRepos({
+  fin,
+  onFin,
+  onDecaler,
+}: {
+  fin: number | null;
+  onFin: () => void;
+  onDecaler: (ms: number) => void;
+}) {
+  const [reste, setReste] = useState(0);
+
+  useEffect(() => {
+    if (fin === null) return;
+    const maj = () => {
+      const secondes = Math.ceil((fin - Date.now()) / 1000);
+      setReste(Math.max(0, secondes));
+      if (secondes <= 0) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        onFin();
+      }
+    };
+    maj();
+    const timer = setInterval(maj, 250);
+    return () => clearInterval(timer);
+  }, [fin, onFin]);
+
+  return (
+    <Sheet visible={fin !== null} onClose={onFin} title="Repos">
+      <Text
+        className="text-center text-5xl font-bold text-accent"
+        style={{ fontVariant: ['tabular-nums'] }}>
+        {formatChrono(reste)}
+      </Text>
+
+      <View className="mt-6 flex-row gap-3">
+        <View className="flex-1">
+          <Button label="− 15 s" variant="secondary" onPress={() => onDecaler(-15_000)} />
+        </View>
+        <View className="flex-1">
+          <Button label="+ 15 s" variant="secondary" onPress={() => onDecaler(15_000)} />
+        </View>
+      </View>
+
+      <View className="mt-3">
+        <Button label="Passer" variant="secondary" onPress={onFin} />
+      </View>
+    </Sheet>
+  );
+}
+
 export default function WorkoutScreen() {
   // L'écran reste allumé pendant toute la séance.
   useKeepAwake();
@@ -147,6 +210,8 @@ export default function WorkoutScreen() {
   const [indexBloc, setIndexBloc] = useState(0);
   const [chrono, setChrono] = useState(0);
   const [cloture, setCloture] = useState(false);
+  // Instant de fin du repos en cours, `null` si aucun repos n'est lancé.
+  const [finRepos, setFinRepos] = useState<number | null>(null);
 
   const demarre = useRef(false);
 
@@ -187,6 +252,8 @@ export default function WorkoutScreen() {
       ),
     [indexBloc],
   );
+
+  const arreterRepos = useCallback(() => setFinRepos(null), []);
 
   if (echec) {
     return (
@@ -241,11 +308,13 @@ export default function WorkoutScreen() {
           charge_kg: versNombre(avant.weight),
           rpe: exercice.rpe,
         });
+        if (exercice.repos_sec) setFinRepos(Date.now() + exercice.repos_sec * 1000);
       } else {
         await supprimerSerie(clientUuid, exercice.exercise_id, index + 1);
       }
     } catch {
       majSerie(index, { validated: avant.validated });
+      setFinRepos(null);
       setErreur("Cette série n'a pas été enregistrée. Réessaie.");
     }
   };
@@ -388,6 +457,12 @@ export default function WorkoutScreen() {
           </View>
         </SafeAreaView>
       </View>
+
+      <SheetRepos
+        fin={finRepos}
+        onFin={arreterRepos}
+        onDecaler={(ms) => setFinRepos((f) => (f === null ? null : f + ms))}
+      />
     </View>
   );
 }

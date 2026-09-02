@@ -14,6 +14,14 @@ type SetRowProps = {
 
 const TABULAR = { fontVariant: ['tabular-nums' as const] };
 
+// Sans largeur explicite, iOS dimensionne le champ sur son contenu mesuré —
+// avec un temps de retard. Une charge à trois chiffres plus décimale
+// (« 142,5 ») sortait tronquée à « 142 », et un champ vide (exercice jamais
+// fait) tombait à zéro de large : plus rien à toucher pour saisir la charge.
+// Ces largeurs tiennent la valeur la plus longue que `maxLength` autorise.
+const LARGEUR_CHARGE = 'w-20'; // « 142,5 » en text-2xl bold tabular
+const LARGEUR_REPS = 'w-12'; // trois chiffres
+
 export function SetRow({
   index,
   weight,
@@ -43,8 +51,9 @@ export function SetRow({
           value={weight}
           onChangeText={onChangeWeight}
           keyboardType="decimal-pad"
+          maxLength={5}
           selectTextOnFocus
-          className={`h-14 text-2xl font-bold ${valueColor}`}
+          className={`h-14 ${LARGEUR_CHARGE} text-2xl font-bold ${valueColor}`}
           style={TABULAR}
         />
         <Text className="ml-1 text-sm text-text-tertiary">kg</Text>
@@ -55,8 +64,9 @@ export function SetRow({
           value={reps}
           onChangeText={onChangeReps}
           keyboardType="number-pad"
+          maxLength={3}
           selectTextOnFocus
-          className={`h-14 text-2xl font-bold ${valueColor}`}
+          className={`h-14 ${LARGEUR_REPS} text-2xl font-bold ${valueColor}`}
           style={TABULAR}
         />
         <Text className="ml-1 text-sm text-text-tertiary">reps</Text>
